@@ -5,11 +5,6 @@ class server {
     private $ip;
     private $port;
 
-    const WEB_ROOT = "/Users/zhoumengkang/Documents/html";
-
-    // 系统支持的 cgi 程序的文件扩展名
-    private $cgi_extension = array("cgi");
-
     public function __construct($ip, $port) {
         $this->ip = $ip;
         $this->port = $port;
@@ -19,15 +14,18 @@ class server {
     private function await() {
 
         $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+
         if ($sock < 0) {
             echo "Error:" . socket_strerror(socket_last_error()) . "\n";
         }
  
         $ret = socket_bind($sock, $this->ip, $this->port);
+
         if (!$ret) {
             echo "BIND FAILED:" . socket_strerror(socket_last_error()) . "\n";
             exit;
         }
+
         echo "OK\n";
  
         $ret = socket_listen($sock);
@@ -41,32 +39,24 @@ class server {
             try {
                 $new_sock = socket_accept($sock);
             } catch (Exception $e) {
-                print $e->getMessage();
+                echo $e->getMessage();
                 echo "ACCEPT FAILED:" . socket_strerror(socket_last_error()) . "\n";
             }
 
             try {
-                $buf = socket_read($new_sock, 1024);
+                $request_string = socket_read($new_sock, 1024);
 
-                $msg = $this->output($buf);
+                $response = $this->output($request_string);
 
-                socket_write($new_sock, $msg, strlen($msg));
+                socket_write($new_sock, $response);
                 socket_close($new_sock);
 
             } catch (Exception $e) {
-                print $e->getMessage();
+                echo $e->getMessage();
                 echo "READ FAILED:" . socket_strerror(socket_last_error()) . "\n";
             }
 
         } while (TRUE);
-    }
-
-    /**
-     * 404 返回
-     * @return string
-     */
-    private function not_found(){
-        return "HTTP/1.1 404 File Not Found\r\nContent-Type: text/html\r\nContent-Length: 23\r\n\r\n<h1>File Not Found</h1>";
     }
 
     /**
@@ -78,8 +68,14 @@ class server {
         // 静态 GET /1.html HTTP/1.1 ...
         // 动态 GET /user.cgi?id=1 HTTP/1.1 ...
 
-        $tmp_data = explode(" ",$request_string);
-        $uri = $tmp_data[1];
+        $request_array = explode(" ",$request_string);
+        if(count($request_array) < 2){
+            return "";
+        }
+
+        $uri = $request_array[1];
+
+        echo "request:".web_config::WEB_ROOT . $uri."\n";
 
         $query_string = null;
 
@@ -93,25 +89,23 @@ class server {
             $query_string = isset($uriArr[1]) ? $uriArr[1] : null;
         }
 
-        $filename = self::WEB_ROOT . $uri;
-
-        echo "客户端请求了:".$filename."\n";
+        $filename = web_config::WEB_ROOT . $uri;
 
         if ($this->cgi_check($uri)) {
             
             $this->set_env($query_string);
 
-            $handle = popen(self::WEB_ROOT.$uri, "r");
+            $handle = popen(web_config::WEB_ROOT.$uri, "r");
             $read = stream_get_contents($handle);
             pclose($handle);
 
-            return $read;
+            return $this->add_header($read);
         }
 
         // 静态文件的处理
 
         if (file_exists($filename)) {
-            return file_get_contents($filename);
+            return $this->add_header(file_get_contents($filename));
         } else {
             return $this->not_found();
         }
@@ -144,11 +138,30 @@ class server {
 
         $extension = isset($info["extension"]) ? $info["extension"] : null;
 
-        if( $extension && in_array($extension,$this->cgi_extension)){
+        if( $extension && in_array($extension,explode(",",web_config::CGI_EXTENSION))){
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * 404 返回
+     * @return string
+     */
+    private function not_found(){
+        $content = "<h1>File Not Found </h1>";
+
+        return "HTTP/1.1 404 File Not Found\r\nContent-Type: text/html\r\nContent-Length: ".strlen($content)."\r\n\r\n".$content;
+    }
+
+    /**
+     * 加上头信息
+     * @param $string
+     * @return string
+     */
+    private function add_header($string){
+        return "HTTP/1.1 200 OK\r\nContent-Length: ".strlen($string)."\r\nServer: mengkang\r\n\r\n".$string;
     }
 
 }
