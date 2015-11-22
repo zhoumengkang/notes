@@ -13,7 +13,7 @@
 void process(FILE * fp, int sockfd);
 char * getMessage(char * sendline,int len,FILE * fp);
  
-int main(int argc,char argv[])
+int main(int argc,char const * argv[])
 {
     int fd;
     struct hostent * he;
@@ -21,13 +21,13 @@ int main(int argc,char argv[])
 
     if (argc != 2)
     {
-    	printf("usage %s <IP Adrress>\n", argv[0]);
+    	printf("usage %s <IP Adrress>", argv[0]);
     	exit(1);
     }
 
-    if ((he = gethostbyname(&argv[1])) == NULL)
+    if ((he = gethostbyname(argv[1])) == NULL)
     {
-    	perror("gethostbyname error\n");
+    	perror("gethostbyname error");
     	exit(1);
     }
 
