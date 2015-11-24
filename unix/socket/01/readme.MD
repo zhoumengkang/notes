@@ -3,7 +3,7 @@
 但是服务器没有对子进程数做限制，一旦并发高就出问题。
 
 客户端终端
-```
+```shell
 [zhoumengkang@localhost unix]$ gcc client.c -o client
 [zhoumengkang@localhost unix]$ ./client 127.0.0.1
 input string to server:zmk
@@ -15,7 +15,7 @@ server string return  :ieh
 input string to server:
 ```
 服务器终端
-```
+```shell
 [zhoumengkang@localhost unix]$ gcc server.c -std=c99 -o server
 [zhoumengkang@localhost unix]$ ./server 
 you get a connection from 127.0.0.1:40362
