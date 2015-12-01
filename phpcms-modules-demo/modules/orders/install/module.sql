@@ -1,0 +1,1 @@
+INSERT INTO `phpcms_module` (`module`, `name`, `url`, `iscore`, `version`, `description`, `setting`, `listorder`, `disabled`, `installdate`, `updatedate`) VALUES ('orders', '订单管理', 'orders/', 0, '1.0', '订单管理', '', 0, 0, '2014-5-29', '2014-5-29');
