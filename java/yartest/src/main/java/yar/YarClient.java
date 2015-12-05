@@ -1,5 +1,9 @@
 package yar;
 
+import yar.packager.YarPackager;
+import yar.protocol.YarRequest;
+import yar.protocol.YarResponse;
+
 import java.io.*;
 import java.lang.reflect.Proxy;
 import java.net.URL;
@@ -11,16 +15,16 @@ import java.util.HashMap;
  */
 
 public class YarClient {
-    protected String uri;
+    private String uri;
+    private String packager;
+
     protected HashMap<String,String> options;
 
     public YarClient(String uri){
         this.uri = uri;
+        this.packager = YarPackager.YAR_PACKAGER_JSON;
     }
 
-    public void setOpt(String key,String value){
-
-    }
 
     public final Object useService(Class type) {
         YarClientInvocationHandler handler = new YarClientInvocationHandler(this);
@@ -33,27 +37,22 @@ public class YarClient {
 
     public String invoke(String method,Object[] args){
 
-        String content = "";
-        try {
-            FileInputStream fileInputStream = new FileInputStream(new File("./test.log"));
-            byte[] b = new byte[fileInputStream.available()];
-            fileInputStream.read(b);
-            fileInputStream.close();
-            content = new String(b);
-            System.out.println(content);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        YarRequest yarRequest = new YarRequest();
+        yarRequest.setId(1234);
+        yarRequest.setMethod(method);
+        yarRequest.setParameters(args);
 
-        return sendPost(uri, content);
+        byte[] send = YarPackager.pack(yarRequest,this.packager);
+        byte[] res = sendPost(this.uri, send);
+        YarResponse yarResponse = YarPackager.unpack(res);
+
+        return yarResponse.getOut();
     }
 
-    public static String sendPost(String url, String content) {
-        OutputStreamWriter out = null;
-        BufferedReader in = null;
-        String result = "";
+    public static byte[] sendPost(String url, byte[] content) {
+        OutputStream out = null;
+        InputStream in = null;
+        byte[] b = null;
         try {
             URL realUrl = new URL(url);
             URLConnection conn = realUrl.openConnection();
@@ -62,20 +61,14 @@ public class YarClient {
             conn.setDoOutput(true);
             conn.setDoInput(true);
 
-            out = new OutputStreamWriter(conn.getOutputStream());
-
+            out = conn.getOutputStream();
             out.write(content);
             out.flush();
             out.close();
 
-            in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String line;
-            while ((line = in.readLine()) != null) {
-                if (result.length() > 0){
-                    result += "\n" + line;
-                }
-                result += line;
-            }
+            in = conn.getInputStream();
+            in.read(b);
+            in.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -92,7 +85,6 @@ public class YarClient {
             }
         }
 
-        return result;
+        return b;
     }
-
 }

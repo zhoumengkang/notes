@@ -1,8 +1,6 @@
 package yar.protocol;
 
 
-import java.util.List;
-
 /**
  * Created by zhoumengkang on 3/12/15.
  */
@@ -10,31 +8,31 @@ import java.util.List;
 
 public class YarRequest {
 
-    private int i;
-    private String m;
-    private Object[] p;
+    private long id;
+    private String method;
+    private Object[] parameters;
 
-    public int getI() {
-        return i;
+    public long getId() {
+        return id;
     }
 
-    public void setI(int i) {
-        this.i = i;
+    public void setId(long id) {
+        this.id = id;
     }
 
-    public String getM() {
-        return m;
+    public String getMethod() {
+        return method;
     }
 
-    public void setM(String m) {
-        this.m = m;
+    public void setMethod(String method) {
+        this.method = method;
     }
 
-    public Object[] getP() {
-        return p;
+    public Object[] getParameters() {
+        return parameters;
     }
 
-    public void setP(Object[] p) {
-        this.p = p;
+    public void setParameters(Object[] parameters) {
+        this.parameters = parameters;
     }
 }

@@ -1,7 +1,17 @@
 package yar.protocol;
 
+import java.util.Arrays;
+
 /**
- * Created by zhoumengkang on 3/12/15.
+ * typedef struct _yar_header {
+ *      unsigned int   id;
+ *      unsigned short version;
+ *      unsigned int   magic_num;
+ *      unsigned int   reserved;
+ *      unsigned char  provider[32];
+ *      unsigned char  token[32];
+ *      unsigned int   body_len;
+ *      }
  */
 
 public class YarHeader {
@@ -12,7 +22,11 @@ public class YarHeader {
     private int reserved;
     private char[] provider = new char[32];
     private char[] token = new char[32];
-    private char body_len;
+    private int body_len;
+
+    public YarHeader() {
+        this.magic_num = YarProtocol.YAR_PROTOCOL_MAGIC_NUM;
+    }
 
     public int getId() {
         return id;
@@ -62,11 +76,24 @@ public class YarHeader {
         this.token = token;
     }
 
-    public char getBody_len() {
+    public int getBody_len() {
         return body_len;
     }
 
-    public void setBody_len(char body_len) {
+    public void setBody_len(int body_len) {
         this.body_len = body_len;
+    }
+
+    @Override
+    public String toString() {
+        return "YarHeader{" +
+                "id=" + id +
+                ", version=" + version +
+                ", magic_num=" + magic_num +
+                ", reserved=" + reserved +
+                ", provider=" + Arrays.toString(provider) +
+                ", token=" + Arrays.toString(token) +
+                ", body_len=" + body_len +
+                '}';
     }
 }
