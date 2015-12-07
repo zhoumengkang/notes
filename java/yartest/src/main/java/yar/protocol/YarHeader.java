@@ -1,5 +1,8 @@
 package yar.protocol;
 
+
+import yar.YarProtocol;
+
 import java.util.Arrays;
 
 /**

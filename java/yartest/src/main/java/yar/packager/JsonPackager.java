@@ -1,8 +1,6 @@
 package yar.packager;
 
-import org.json.JSONObject;
 import yar.protocol.YarHeader;
-import yar.protocol.YarRequest;
 
 /**
  * Created by zhoumengkang on 4/12/15.

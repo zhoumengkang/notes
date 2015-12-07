@@ -1,58 +1,34 @@
 package yar.protocol;
 
 /**
- * typedef struct _yar_response {
- *      long id;
- *      int  status;
- *      zend_string *out;
- *      zval err;
- *      zval retval;
- * } yar_response_t;
+ * Created by zhoumengkang on 7/12/15.
  */
 public class YarResponse {
-    private long id;
-    private int status;
-    private String out;
-    private String err;
-    private String retval;
+    private YarHeader yarHeader;
+    private String packagerName;
+    private YarResponseBody yarResponseBody;
 
-    public long getId() {
-        return id;
+    public YarHeader getYarHeader() {
+        return yarHeader;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setYarHeader(YarHeader yarHeader) {
+        this.yarHeader = yarHeader;
     }
 
-    public int getStatus() {
-        return status;
+    public String getPackagerName() {
+        return packagerName;
     }
 
-    public void setStatus(int status) {
-        this.status = status;
+    public void setPackagerName(String packagerName) {
+        this.packagerName = packagerName;
     }
 
-    public String getOut() {
-        return out;
+    public YarResponseBody getYarResponseBody() {
+        return yarResponseBody;
     }
 
-    public void setOut(String out) {
-        this.out = out;
-    }
-
-    public String getErr() {
-        return err;
-    }
-
-    public void setErr(String err) {
-        this.err = err;
-    }
-
-    public String getRetval() {
-        return retval;
-    }
-
-    public void setRetval(String retval) {
-        this.retval = retval;
+    public void setYarResponseBody(YarResponseBody yarResponseBody) {
+        this.yarResponseBody = yarResponseBody;
     }
 }

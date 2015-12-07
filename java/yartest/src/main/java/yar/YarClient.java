@@ -1,7 +1,7 @@
 package yar;
 
 import yar.packager.YarPackager;
-import yar.protocol.YarRequest;
+import yar.protocol.YarRequestBody;
 import yar.protocol.YarResponse;
 
 import java.io.*;
@@ -37,16 +37,15 @@ public class YarClient {
 
     public String invoke(String method,Object[] args){
 
-        YarRequest yarRequest = new YarRequest();
-        yarRequest.setId(1234);
-        yarRequest.setMethod(method);
-        yarRequest.setParameters(args);
+        YarRequestBody yarRequestBody = new YarRequestBody();
+        yarRequestBody.setId(1234);
+        yarRequestBody.setMethod(method);
+        yarRequestBody.setParameters(args);
 
-        byte[] send = YarPackager.pack(yarRequest,this.packager);
+        byte[] send = YarPackager.pack(yarRequestBody,this.packager);
         byte[] res = sendPost(this.uri, send);
-        YarResponse yarResponse = YarPackager.unpack(res);
-
-        return yarResponse.getOut();
+        YarResponse yarResponse = YarProtocol.responseFetch(res);
+        return null;
     }
 
     public static byte[] sendPost(String url, byte[] content) {
@@ -87,4 +86,5 @@ public class YarClient {
 
         return b;
     }
+
 }

@@ -1,38 +1,34 @@
 package yar.protocol;
 
-
 /**
- * Created by zhoumengkang on 3/12/15.
+ * Created by zhoumengkang on 7/12/15.
  */
-
-
 public class YarRequest {
+    private YarHeader yarHeader;
+    private String packagerName;
+    private YarRequestBody yarRequestBody;
 
-    private long id;
-    private String method;
-    private Object[] parameters;
-
-    public long getId() {
-        return id;
+    public YarHeader getYarHeader() {
+        return yarHeader;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setYarHeader(YarHeader yarHeader) {
+        this.yarHeader = yarHeader;
     }
 
-    public String getMethod() {
-        return method;
+    public String getPackagerName() {
+        return packagerName;
     }
 
-    public void setMethod(String method) {
-        this.method = method;
+    public void setPackagerName(String packagerName) {
+        this.packagerName = packagerName;
     }
 
-    public Object[] getParameters() {
-        return parameters;
+    public YarRequestBody getYarRequestBody() {
+        return yarRequestBody;
     }
 
-    public void setParameters(Object[] parameters) {
-        this.parameters = parameters;
+    public void setYarRequestBody(YarRequestBody yarRequestBody) {
+        this.yarRequestBody = yarRequestBody;
     }
 }
