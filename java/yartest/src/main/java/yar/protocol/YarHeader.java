@@ -21,14 +21,14 @@ public class YarHeader {
 
     private int id;
     private short version;
-    private int magic_num;
+    private int magicNum;
     private int reserved;
     private char[] provider = new char[32];
     private char[] token = new char[32];
-    private int body_len;
+    private int bodyLen;
 
     public YarHeader() {
-        this.magic_num = YarProtocol.YAR_PROTOCOL_MAGIC_NUM;
+        this.magicNum = YarProtocol.YAR_PROTOCOL_MAGIC_NUM;
     }
 
     public int getId() {
@@ -47,12 +47,12 @@ public class YarHeader {
         this.version = version;
     }
 
-    public int getMagic_num() {
-        return magic_num;
+    public int getMagicNum() {
+        return magicNum;
     }
 
-    public void setMagic_num(int magic_num) {
-        this.magic_num = magic_num;
+    public void setMagicNum(int magicNum) {
+        this.magicNum = magicNum;
     }
 
     public int getReserved() {
@@ -79,24 +79,12 @@ public class YarHeader {
         this.token = token;
     }
 
-    public int getBody_len() {
-        return body_len;
+    public int getBodyLen() {
+        return bodyLen;
     }
 
-    public void setBody_len(int body_len) {
-        this.body_len = body_len;
+    public void setBodyLen(int bodyLen) {
+        this.bodyLen = bodyLen;
     }
 
-    @Override
-    public String toString() {
-        return "YarHeader{" +
-                "id=" + id +
-                ", version=" + version +
-                ", magic_num=" + magic_num +
-                ", reserved=" + reserved +
-                ", provider=" + Arrays.toString(provider) +
-                ", token=" + Arrays.toString(token) +
-                ", body_len=" + body_len +
-                '}';
-    }
 }

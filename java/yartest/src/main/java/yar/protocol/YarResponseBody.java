@@ -14,7 +14,7 @@ public class YarResponseBody {
     private int status;
     private String out;
     private String err;
-    private String retval;
+    private String retVal;
 
     public long getId() {
         return id;
@@ -48,11 +48,11 @@ public class YarResponseBody {
         this.err = err;
     }
 
-    public String getRetval() {
-        return retval;
+    public String getRetVal() {
+        return retVal;
     }
 
-    public void setRetval(String retval) {
-        this.retval = retval;
+    public void setRetVal(String retVal) {
+        this.retVal = retVal;
     }
 }

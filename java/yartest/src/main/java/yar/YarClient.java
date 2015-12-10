@@ -1,5 +1,6 @@
 package yar;
 
+import yar.packager.JsonPackager;
 import yar.packager.YarPackager;
 import yar.protocol.YarRequestBody;
 import yar.protocol.YarResponse;
@@ -41,12 +42,14 @@ public class YarClient {
         yarRequestBody.setId(1234);
         yarRequestBody.setMethod(method);
         yarRequestBody.setParameters(args);
-
-        byte[] send = YarPackager.pack(yarRequestBody,this.packager);
+        // TODO
+        byte[] send = new JsonPackager().pack(yarRequestBody);
         byte[] res = sendPost(this.uri, send);
         YarResponse yarResponse = YarProtocol.responseFetch(res);
         return null;
     }
+
+
 
     public static byte[] sendPost(String url, byte[] content) {
         OutputStream out = null;

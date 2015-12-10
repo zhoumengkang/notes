@@ -12,19 +12,29 @@ import yar.protocol.YarResponseBody;
 /**
  * Created by zhoumengkang on 5/12/15.
  */
-public class YarPackager {
+abstract public class YarPackager {
 
     public static final String YAR_PACKAGER_PHP      = "PHP";
     public static final String 	YAR_PACKAGER_JSON    =  "JSON";
     public static final String 	YAR_PACKAGER_MSGPACK = "MSGPACK";
 
 
-    public static byte[] pack(YarRequestBody yarRequestBody, String yarPackageType){
-        return new byte[123];
-    }
+    public abstract byte[] pack(YarRequestBody yarRequestBody);
 
-    public static YarResponse unpack(byte[] content){
-        return null;
+    public abstract YarResponseBody unpack(YarResponse yarResponse);
+
+    public String nameCheck(String packagerName){
+        packagerName = packagerName.toLowerCase();
+
+        if (packagerName.equals(YAR_PACKAGER_PHP.toLowerCase())
+                ||packagerName.equals(YAR_PACKAGER_JSON.toLowerCase())
+                ||packagerName.equals(YAR_PACKAGER_MSGPACK.toLowerCase())
+                ){
+            return packagerName;
+        }else{
+            System.out.printf("unsupported packager %s",packagerName);
+            return null;
+        }
     }
 
 }

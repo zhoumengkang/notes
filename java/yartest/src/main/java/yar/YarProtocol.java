@@ -1,12 +1,11 @@
 package yar;
 
 import yar.protocol.YarHeader;
+import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 import yar.protocol.YarResponseBody;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created by zhoumengkang on 5/12/15.
@@ -45,7 +44,7 @@ public class YarProtocol {
             }
             yarHeader.setToken(token);
 
-            yarHeader.setBody_len(in.readInt());
+            yarHeader.setBodyLen(in.readInt());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -61,7 +60,7 @@ public class YarProtocol {
     }
 
     public static YarResponse responseFetch(byte[] responseByte){
-        YarResponseBody yarResponseBody = new YarResponseBody();
+
         YarResponse yarResponse = new YarResponse();
 
         byte[] header = new byte[YAR_HEADER_LENGTH];
@@ -70,36 +69,63 @@ public class YarProtocol {
         }
 
         YarHeader yarHeader = YarProtocol.parse(header);
-        Base.debugPrint(yarHeader);
         yarResponse.setYarHeader(yarHeader);
 
         byte[] packager = new byte[YAR_PACKAGER_NAME_LENGTH];
+        int packagerLength = 0;
         for (int i = 0; i < YAR_PACKAGER_NAME_LENGTH; i++) {
             packager[i] = responseByte[YAR_HEADER_LENGTH + i];
-            // 在这个8字节中后面的内容可能之前已经被占用，需要截取下
+            // 在这个8字节中，当是 php 或者是 json 的时候，后面的三个或者四个字节可能之前已经被占用，需要截取下
             if (packager[i] == 0){
+                packagerLength = i - 1;
                 break;
             }
         }
 
         String packagerName = new String(packager);
         Base.debugPrint(packagerName);
-        yarResponse.setPackagerName(packagerName);
+        yarResponse.setPackagerName(packagerName.substring(0,packagerLength));
 
 
         int off = YAR_HEADER_LENGTH + YAR_PACKAGER_NAME_LENGTH;
         int len = responseByte.length;
 
-        byte[] retval = new byte[len];
+        byte[] yarResponseBody = new byte[len];
         for (int i = off; i < len; i++) {
-            retval[i - off] = responseByte[i];
+            yarResponseBody[i - off] = responseByte[i];
         }
 
-        yarResponseBody.setRetval(new String(retval));
         yarResponse.setYarResponseBody(yarResponseBody);
 
         return yarResponse;
     }
 
+    public static byte[] requestCreate(YarRequest yarRequest) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream out = new DataOutputStream(byteArrayOutputStream);
+
+        YarHeader yarHeader = yarRequest.getYarHeader();
+
+        try {
+            out.writeInt(yarHeader.getId());
+            out.writeShort(yarHeader.getVersion());
+            out.writeInt(yarHeader.getMagicNum());
+            out.writeInt(yarHeader.getReserved());
+
+            for (char aProvider : yarHeader.getProvider()) {
+                out.writeChar(aProvider);
+            }
+
+            for (char aToken : yarHeader.getToken()) {
+                out.writeChar(aToken);
+            }
+
+            out.writeInt(yarHeader.getBodyLen());
+            return byteArrayOutputStream.toByteArray();
+        } finally {
+            byteArrayOutputStream.close();
+            out.close();
+        }
+    }
 
 }

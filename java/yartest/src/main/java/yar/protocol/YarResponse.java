@@ -6,7 +6,7 @@ package yar.protocol;
 public class YarResponse {
     private YarHeader yarHeader;
     private String packagerName;
-    private YarResponseBody yarResponseBody;
+    private byte[] yarResponseBody;
 
     public YarHeader getYarHeader() {
         return yarHeader;
@@ -24,11 +24,11 @@ public class YarResponse {
         this.packagerName = packagerName;
     }
 
-    public YarResponseBody getYarResponseBody() {
+    public byte[] getYarResponseBody() {
         return yarResponseBody;
     }
 
-    public void setYarResponseBody(YarResponseBody yarResponseBody) {
+    public void setYarResponseBody(byte[] yarResponseBody) {
         this.yarResponseBody = yarResponseBody;
     }
 }
