@@ -1,9 +1,9 @@
 package yar;
 
-import yar.packager.JsonPackager;
 import yar.packager.YarPackager;
-import yar.protocol.YarRequestBody;
+import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
+import yar.protocol.YarResponseBody;
 
 import java.io.*;
 import java.lang.reflect.Proxy;
@@ -19,11 +19,20 @@ public class YarClient {
     private String uri;
     private String packager;
 
+    public static final char YAR_OPT_PACKAGER           = 1;
+    public static final char YAR_OPT_PERSISTENT         = 2;
+    public static final char YAR_OPT_TIMEOUT            = 4;
+    public static final char YAR_OPT_CONNECT_TIMEOUT    = 8;
+
     protected HashMap<String,String> options;
 
     public YarClient(String uri){
         this.uri = uri;
         this.packager = YarPackager.YAR_PACKAGER_JSON;
+    }
+
+    public static void setOpt(int opt,int value){
+
     }
 
 
@@ -36,17 +45,30 @@ public class YarClient {
         }
     }
 
-    public String invoke(String method,Object[] args){
+    public Object invoke(String method,Object[] args){
 
-        YarRequestBody yarRequestBody = new YarRequestBody();
-        yarRequestBody.setId(1234);
-        yarRequestBody.setMethod(method);
-        yarRequestBody.setParameters(args);
-        // TODO
-        byte[] send = new JsonPackager().pack(yarRequestBody);
-        byte[] res = sendPost(this.uri, send);
+        YarRequest yarRequest = new YarRequest();
+        yarRequest.setId(1234);
+        yarRequest.setMethod(method);
+        yarRequest.setParameters(args);
+        yarRequest.setPackagerName(this.packager);
+
+        byte[] res = new byte[0];
+        try {
+            res = sendPost(this.uri, YarProtocol.requestCreate(yarRequest));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         YarResponse yarResponse = YarProtocol.responseFetch(res);
-        return null;
+
+        try {
+            YarResponseBody yarResponseBody = YarPackager.get(yarResponse.getPackagerName()).unpack(yarResponse);
+            return yarResponseBody.getRetVal();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 

@@ -1,20 +1,17 @@
 package yar.protocol;
 
+
 /**
- * Created by zhoumengkang on 7/12/15.
+ * Created by zhoumengkang on 3/12/15.
  */
+
+
 public class YarRequest {
-    private YarHeader yarHeader;
+
     private String packagerName;
-    private YarRequestBody yarRequestBody;
-
-    public YarHeader getYarHeader() {
-        return yarHeader;
-    }
-
-    public void setYarHeader(YarHeader yarHeader) {
-        this.yarHeader = yarHeader;
-    }
+    private long id;
+    private String method;
+    private Object[] parameters;
 
     public String getPackagerName() {
         return packagerName;
@@ -24,11 +21,27 @@ public class YarRequest {
         this.packagerName = packagerName;
     }
 
-    public YarRequestBody getYarRequestBody() {
-        return yarRequestBody;
+    public long getId() {
+        return id;
     }
 
-    public void setYarRequestBody(YarRequestBody yarRequestBody) {
-        this.yarRequestBody = yarRequestBody;
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
+    }
+
+    public Object[] getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Object[] parameters) {
+        this.parameters = parameters;
     }
 }

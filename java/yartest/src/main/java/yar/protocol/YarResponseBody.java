@@ -1,5 +1,7 @@
 package yar.protocol;
 
+import org.json.JSONObject;
+
 /**
  * typedef struct _yar_response {
  *      long id;
@@ -14,7 +16,7 @@ public class YarResponseBody {
     private int status;
     private String out;
     private String err;
-    private String retVal;
+    private Object retVal;
 
     public long getId() {
         return id;
@@ -48,11 +50,22 @@ public class YarResponseBody {
         this.err = err;
     }
 
-    public String getRetVal() {
+    public Object getRetVal() {
         return retVal;
     }
 
-    public void setRetVal(String retVal) {
+    public void setRetVal(Object retVal) {
         this.retVal = retVal;
+    }
+
+    @Override
+    public String toString() {
+        return "YarResponseBody{" +
+                "id=" + id +
+                ", status=" + status +
+                ", out='" + out + '\'' +
+                ", err='" + err + '\'' +
+                ", retVal=" + retVal +
+                '}';
     }
 }

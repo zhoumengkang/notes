@@ -1,11 +1,12 @@
 package yar;
 
-import yar.protocol.YarHeader;
-import yar.protocol.YarRequest;
-import yar.protocol.YarResponse;
-import yar.protocol.YarResponseBody;
+import yar.packager.YarPackager;
+import yar.protocol.*;
 
 import java.io.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by zhoumengkang on 5/12/15.
@@ -16,8 +17,11 @@ public class YarProtocol {
     public static final int YAR_HEADER_LENGTH = 82;
     public static final int YAR_PACKAGER_NAME_LENGTH = 8;
 
-    public static byte[] render(){
-        return null;
+    public static YarHeader render(YarRequest yarRequest){
+        YarHeader yarHeader = new YarHeader();
+        yarHeader.setId((int) yarRequest.getId());
+        yarHeader.setMagicNum(YAR_PROTOCOL_MAGIC_NUM);
+        return yarHeader;
     }
 
     public static YarHeader parse(byte[] content){
@@ -101,10 +105,26 @@ public class YarProtocol {
     }
 
     public static byte[] requestCreate(YarRequest yarRequest) throws IOException {
+
+        byte[] body;
+        ByteArrayOutputStream bodyOut = new ByteArrayOutputStream();
+        try {
+            bodyOut.write(Arrays.copyOf(yarRequest.getPackagerName().toUpperCase().getBytes(), 8));
+            bodyOut.write(YarPackager.get(yarRequest.getPackagerName()).pack(yarRequest));
+            body = bodyOut.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            bodyOut.close();
+        }
+
+        YarHeader yarHeader = new YarHeader();
+        yarHeader.setBodyLen(body.length);
+        yarHeader.setId((int) yarRequest.getId());
+
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(byteArrayOutputStream);
-
-        YarHeader yarHeader = yarRequest.getYarHeader();
 
         try {
             out.writeInt(yarHeader.getId());
@@ -121,11 +141,15 @@ public class YarProtocol {
             }
 
             out.writeInt(yarHeader.getBodyLen());
+
+            out.write(body);
+
             return byteArrayOutputStream.toByteArray();
         } finally {
             byteArrayOutputStream.close();
             out.close();
         }
+
     }
 
 }

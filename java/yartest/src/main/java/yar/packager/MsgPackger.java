@@ -1,6 +1,6 @@
 package yar.packager;
 
-import yar.protocol.YarRequestBody;
+import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 import yar.protocol.YarResponseBody;
 
@@ -9,7 +9,7 @@ import yar.protocol.YarResponseBody;
  */
 public class MsgPackger extends YarPackager {
     @Override
-    public byte[] pack(YarRequestBody yarRequestBody) {
+    public byte[] pack(YarRequest yarRequest) {
         return new byte[0];
     }
 

@@ -1,6 +1,6 @@
 package yar.packager;
 
-import yar.protocol.YarRequestBody;
+import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 import yar.protocol.YarResponseBody;
 
@@ -23,7 +23,7 @@ abstract public class YarPackager {
         register();
     }
 
-    public abstract byte[] pack(YarRequestBody yarRequestBody);
+    public abstract byte[] pack(YarRequest yarRequest);
 
     public abstract YarResponseBody unpack(YarResponse yarResponse);
 
@@ -43,6 +43,15 @@ abstract public class YarPackager {
         yarPackagerMap.put(YAR_PACKAGER_PHP.toLowerCase(),new PhpPackger());
         yarPackagerMap.put(YAR_PACKAGER_JSON.toLowerCase(),new JsonPackager());
         yarPackagerMap.put(YAR_PACKAGER_MSGPACK.toLowerCase(),new MsgPackger());
+    }
+
+    public static Map<String,Object> requestFormat(YarRequest yarRequest){
+        Map<String, Object> request = new HashMap<String, Object>();
+        request.put("i", yarRequest.getId());
+        request.put("m", yarRequest.getMethod());
+        request.put("p", yarRequest.getParameters());
+
+        return request;
     }
 
 }
