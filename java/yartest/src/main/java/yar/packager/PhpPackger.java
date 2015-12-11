@@ -1,14 +1,13 @@
 package yar.packager;
 
-import org.json.JSONObject;
 import yar.protocol.YarRequestBody;
 import yar.protocol.YarResponse;
 import yar.protocol.YarResponseBody;
 
 /**
- * Created by zhoumengkang on 4/12/15.
+ * Created by zhoumengkang on 11/12/15.
  */
-public class JsonPackager extends YarPackager {
+public class PhpPackger extends YarPackager {
     @Override
     public byte[] pack(YarRequestBody yarRequestBody) {
         return new byte[0];
@@ -16,10 +15,6 @@ public class JsonPackager extends YarPackager {
 
     @Override
     public YarResponseBody unpack(YarResponse yarResponse) {
-
-        JSONObject jsonObject = new JSONObject(new String(yarResponse.getYarResponseBody()));
-        System.out.println(jsonObject);
-
         return null;
     }
 }

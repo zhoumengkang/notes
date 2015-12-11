@@ -77,7 +77,7 @@ public class YarProtocol {
             packager[i] = responseByte[YAR_HEADER_LENGTH + i];
             // 在这个8字节中，当是 php 或者是 json 的时候，后面的三个或者四个字节可能之前已经被占用，需要截取下
             if (packager[i] == 0){
-                packagerLength = i - 1;
+                packagerLength = i;
                 break;
             }
         }
