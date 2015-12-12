@@ -16,9 +16,4 @@ public class SupportService {
         RewardScoreService rewardScoreService = (RewardScoreService) yarClient.useService(RewardScoreService.class);
         return rewardScoreService.support(uid, feedId);
     }
-
-    public static void main(String[] args) {
-        String res = add(1, 2);
-        System.out.println(res);
-    }
 }

@@ -5,8 +5,6 @@ import yar.protocol.*;
 
 import java.io.*;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by zhoumengkang on 5/12/15.
@@ -17,10 +15,13 @@ public class YarProtocol {
     public static final int YAR_HEADER_LENGTH = 82;
     public static final int YAR_PACKAGER_NAME_LENGTH = 8;
 
-    public static YarHeader render(YarRequest yarRequest){
+    public static YarHeader render(YarRequest yarRequest,int length){
         YarHeader yarHeader = new YarHeader();
         yarHeader.setId((int) yarRequest.getId());
         yarHeader.setMagicNum(YAR_PROTOCOL_MAGIC_NUM);
+        yarHeader.setBodyLen(length);
+        yarHeader.setProvider(YarConfig.getString("yar.provider"));
+        yarHeader.setToken(YarConfig.getString("yar.token"));
         return yarHeader;
     }
 
@@ -117,11 +118,7 @@ public class YarProtocol {
             bodyOut.close();
         }
 
-        YarHeader yarHeader = new YarHeader();
-        yarHeader.setBodyLen(body.length);
-        yarHeader.setId((int) yarRequest.getId());
-        yarHeader.setProvider("zmk");
-        yarHeader.setToken("123");
+        YarHeader yarHeader = render(yarRequest,body.length);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(byteArrayOutputStream);
@@ -131,12 +128,9 @@ public class YarProtocol {
             out.writeShort(yarHeader.getVersion());
             out.writeInt(yarHeader.getMagicNum());
             out.writeInt(yarHeader.getReserved());
-            out.write(Arrays.copyOf(yarHeader.getProvider().getBytes(), 32));
+            out.write(Arrays.copyOf(yarHeader.getProvider().getBytes(),32));
             out.write(Arrays.copyOf(yarHeader.getToken().getBytes(),32));
-
             out.writeInt(yarHeader.getBodyLen());
-
-
 
             out.write(body);
 

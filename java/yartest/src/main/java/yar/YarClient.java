@@ -27,13 +27,8 @@ public class YarClient {
 
     public YarClient(String uri){
         this.uri = uri;
-        this.packager = YarPackager.YAR_PACKAGER_JSON;
+        this.packager = YarConfig.getString("yar.packager");
     }
-
-    public static void setOpt(int opt,int value){
-
-    }
-
 
     public final Object useService(Class type) {
         YarClientInvocationHandler handler = new YarClientInvocationHandler(this);
@@ -47,7 +42,7 @@ public class YarClient {
     public Object invoke(String method,Object[] args){
 
         YarRequest yarRequest = new YarRequest();
-        yarRequest.setId(1234);
+        yarRequest.setId(123456789);
         yarRequest.setMethod(method);
         yarRequest.setParameters(args);
         yarRequest.setPackagerName(this.packager);
@@ -60,6 +55,7 @@ public class YarClient {
         }
 
         YarResponse yarResponse = YarProtocol.responseFetch(res);
+        assert yarResponse != null;
         return yarResponse.getRetVal();
     }
 
