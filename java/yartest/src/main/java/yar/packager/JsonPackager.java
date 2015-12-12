@@ -17,7 +17,6 @@ public class JsonPackager extends YarPackager {
         Map<String,Object> request = requestFormat(yarRequest);
         JSONObject jsonObject = new JSONObject(request);
         String string = jsonObject.toString();
-        byte[] bytes = new byte[string.length()];
         return string.getBytes();
     }
 

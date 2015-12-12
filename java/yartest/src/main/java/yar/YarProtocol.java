@@ -36,17 +36,13 @@ public class YarProtocol {
             }
             yarHeader.setReserved(in.readInt());
 
-            char[] provider = new char[16];
-            for (int i = 0; i < provider.length; i++) {
-                provider[i] = in.readChar();
-            }
-            yarHeader.setProvider(provider);
+            byte[] provider = new byte[32];
+            in.read(provider,0,32);
+            yarHeader.setProvider(new String(provider));
 
-            char[] token = new char[16];
-            for (int i = 0; i < token.length; i++) {
-                token[i] = in.readChar();
-            }
-            yarHeader.setToken(token);
+            byte[] token = new byte[32];
+            in.read(token,0,32);
+            yarHeader.setToken(new String(token));
 
             yarHeader.setBodyLen(in.readInt());
 
@@ -87,8 +83,8 @@ public class YarProtocol {
         }
 
         String packagerName = new String(packager);
-        Base.debugPrint(packagerName);
-        yarResponse.setPackagerName(packagerName.substring(0,packagerLength));
+        Base.debugPrint(packagerName + ":res");
+        yarResponse.setPackagerName(packagerName.substring(0, packagerLength));
 
 
         int off = YAR_HEADER_LENGTH + YAR_PACKAGER_NAME_LENGTH;
@@ -111,6 +107,7 @@ public class YarProtocol {
         try {
             bodyOut.write(Arrays.copyOf(yarRequest.getPackagerName().toUpperCase().getBytes(), 8));
             bodyOut.write(YarPackager.get(yarRequest.getPackagerName()).pack(yarRequest));
+
             body = bodyOut.toByteArray();
         } catch (Exception e) {
             e.printStackTrace();
@@ -122,6 +119,8 @@ public class YarProtocol {
         YarHeader yarHeader = new YarHeader();
         yarHeader.setBodyLen(body.length);
         yarHeader.setId((int) yarRequest.getId());
+        yarHeader.setProvider("zmk");
+        yarHeader.setToken("123");
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream out = new DataOutputStream(byteArrayOutputStream);
@@ -131,16 +130,12 @@ public class YarProtocol {
             out.writeShort(yarHeader.getVersion());
             out.writeInt(yarHeader.getMagicNum());
             out.writeInt(yarHeader.getReserved());
-
-            for (char aProvider : yarHeader.getProvider()) {
-                out.writeChar(aProvider);
-            }
-
-            for (char aToken : yarHeader.getToken()) {
-                out.writeChar(aToken);
-            }
+            out.write(Arrays.copyOf(yarHeader.getProvider().getBytes(), 32));
+            out.write(Arrays.copyOf(yarHeader.getToken().getBytes(),32));
 
             out.writeInt(yarHeader.getBodyLen());
+
+
 
             out.write(body);
 

@@ -23,8 +23,8 @@ public class YarHeader {
     private short version;
     private int magicNum;
     private int reserved;
-    private char[] provider = new char[32];
-    private char[] token = new char[32];
+    private String provider;
+    private String token;
     private int bodyLen;
 
     public YarHeader() {
@@ -63,19 +63,19 @@ public class YarHeader {
         this.reserved = reserved;
     }
 
-    public char[] getProvider() {
+    public String getProvider() {
         return provider;
     }
 
-    public void setProvider(char[] provider) {
+    public void setProvider(String provider) {
         this.provider = provider;
     }
 
-    public char[] getToken() {
+    public String getToken() {
         return token;
     }
 
-    public void setToken(char[] token) {
+    public void setToken(String token) {
         this.token = token;
     }
 

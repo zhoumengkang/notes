@@ -53,7 +53,7 @@ public class YarClient {
         yarRequest.setParameters(args);
         yarRequest.setPackagerName(this.packager);
 
-        byte[] res = new byte[0];
+        byte[] res = null;
         try {
             res = sendPost(this.uri, YarProtocol.requestCreate(yarRequest));
         } catch (IOException e) {
@@ -91,6 +91,7 @@ public class YarClient {
             out.close();
 
             in = conn.getInputStream();
+            b = new byte[in.available()];
             in.read(b);
             in.close();
 
@@ -108,6 +109,7 @@ public class YarClient {
                 ex.printStackTrace();
             }
         }
+
 
         return b;
     }
