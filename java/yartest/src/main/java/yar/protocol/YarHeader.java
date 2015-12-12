@@ -2,9 +2,6 @@ package yar.protocol;
 
 
 import yar.YarProtocol;
-
-import java.util.Arrays;
-
 /**
  * typedef struct _yar_header {
  *      unsigned int   id;

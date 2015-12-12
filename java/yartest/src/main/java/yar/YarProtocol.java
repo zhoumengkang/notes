@@ -69,7 +69,6 @@ public class YarProtocol {
         }
 
         YarHeader yarHeader = YarProtocol.parse(header);
-        yarResponse.setYarHeader(yarHeader);
 
         byte[] packager = new byte[YAR_PACKAGER_NAME_LENGTH];
         int packagerLength = 0;
@@ -83,9 +82,8 @@ public class YarProtocol {
         }
 
         String packagerName = new String(packager);
-        Base.debugPrint(packagerName + ":res");
+        Base.debugPrint(packagerName);
         yarResponse.setPackagerName(packagerName.substring(0, packagerLength));
-
 
         int off = YAR_HEADER_LENGTH + YAR_PACKAGER_NAME_LENGTH;
         int len = responseByte.length;
@@ -95,9 +93,12 @@ public class YarProtocol {
             yarResponseBody[i - off] = responseByte[i];
         }
 
-        yarResponse.setYarResponseBody(yarResponseBody);
-
-        return yarResponse;
+        try {
+            return YarPackager.get(yarResponse.getPackagerName()).unpack(yarResponseBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static byte[] requestCreate(YarRequest yarRequest) throws IOException {

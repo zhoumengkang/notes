@@ -4,7 +4,6 @@ import org.json.JSONObject;
 import yar.Base;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
-import yar.protocol.YarResponseBody;
 
 import java.util.Map;
 
@@ -21,17 +20,15 @@ public class JsonPackager extends YarPackager {
     }
 
     @Override
-    public YarResponseBody unpack(YarResponse yarResponse) {
-
-        JSONObject jsonObject = new JSONObject(new String(yarResponse.getYarResponseBody()));
+    public YarResponse unpack(byte[] content) {
+        JSONObject jsonObject = new JSONObject(new String(content));
         Base.debugPrint(jsonObject);
+        YarResponse yarResponse = new YarResponse();
+        yarResponse.setId(jsonObject.getLong("i"));
+        yarResponse.setStatus(jsonObject.getInt("s"));
+        yarResponse.setOut(jsonObject.getString("o"));
+        yarResponse.setRetVal(jsonObject.get("r"));
 
-        YarResponseBody yarResponseBody = new YarResponseBody();
-        yarResponseBody.setId(jsonObject.getLong("i"));
-        yarResponseBody.setStatus(jsonObject.getInt("s"));
-        yarResponseBody.setOut(jsonObject.getString("o"));
-        yarResponseBody.setRetVal(jsonObject.get("r"));
-
-        return yarResponseBody;
+        return yarResponse;
     }
 }

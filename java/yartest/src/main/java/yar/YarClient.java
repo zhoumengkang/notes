@@ -3,7 +3,6 @@ package yar;
 import yar.packager.YarPackager;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
-import yar.protocol.YarResponseBody;
 
 import java.io.*;
 import java.lang.reflect.Proxy;
@@ -61,14 +60,7 @@ public class YarClient {
         }
 
         YarResponse yarResponse = YarProtocol.responseFetch(res);
-
-        try {
-            YarResponseBody yarResponseBody = YarPackager.get(yarResponse.getPackagerName()).unpack(yarResponse);
-            return yarResponseBody.getRetVal();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return yarResponse.getRetVal();
     }
 
 

@@ -2,7 +2,6 @@ package yar.packager;
 
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
-import yar.protocol.YarResponseBody;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +24,7 @@ abstract public class YarPackager {
 
     public abstract byte[] pack(YarRequest yarRequest);
 
-    public abstract YarResponseBody unpack(YarResponse yarResponse);
+    public abstract YarResponse unpack(byte[] content);
 
     public static YarPackager get(String packagerName) throws Exception {
         packagerName = packagerName.toLowerCase();
