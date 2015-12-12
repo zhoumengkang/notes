@@ -83,7 +83,7 @@ public class YarProtocol {
         }
 
         String packagerName = new String(packager);
-        Base.debugPrint(packagerName);
+        YarClient.debug(packagerName);
         yarResponse.setPackagerName(packagerName.substring(0, packagerLength));
 
         int off = YAR_HEADER_LENGTH + YAR_PACKAGER_NAME_LENGTH;

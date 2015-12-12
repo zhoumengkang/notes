@@ -1,7 +1,7 @@
 package yar.packager;
 
 import org.json.JSONObject;
-import yar.Base;
+import yar.YarClient;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 
@@ -22,6 +22,7 @@ public class JsonPackager extends YarPackager {
     @Override
     public YarResponse unpack(byte[] content) {
         JSONObject jsonObject = new JSONObject(new String(content));
+        YarClient.debug(jsonObject);
         YarResponse yarResponse = new YarResponse();
         yarResponse.setId(jsonObject.getLong("i"));
         yarResponse.setStatus(jsonObject.getInt("s"));

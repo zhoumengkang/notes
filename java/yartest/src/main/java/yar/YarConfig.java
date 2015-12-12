@@ -62,10 +62,27 @@ public class YarConfig {
             if (null == instance) {
                 getInstance();
             }
-            return properties.getProperty( str );
+            return properties.getProperty(str);
         } catch (Exception e) {
             e.printStackTrace();
             return "";
+        }
+    }
+
+    /**
+     * 将属性值获取为boolean型
+     * @param str 属性名
+     * @return
+     */
+    public static boolean getBoolean( String str){
+        try {
+            if (null == instance) {
+                getInstance();
+            }
+            return Boolean.parseBoolean(properties.getProperty(str));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 
