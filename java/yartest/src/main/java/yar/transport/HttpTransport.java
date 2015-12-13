@@ -1,6 +1,7 @@
 package yar.transport;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -46,14 +47,18 @@ public class HttpTransport implements YarTransport{
     public YarResponse exec(YarRequest yarRequest) throws IOException {
         HttpPost httpPost = new HttpPost(this.url);
         httpPost.setConfig(this.requestConfig);
+        httpPost.addHeader("User-Agent","JAVA Yar Rpc-1.0");
         httpPost.setEntity(new ByteArrayEntity(YarProtocol.requestCreate(yarRequest), ContentType.APPLICATION_FORM_URLENCODED));
         try {
             this.httpResponse = httpClient.execute(httpPost);
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
             if(httpResponse.getStatusLine().getStatusCode()==200){
                 HttpEntity entity = httpResponse.getEntity();
                 if (entity != null) {
                     return YarProtocol.responseFetch(EntityUtils.toByteArray(entity));
                 }
+            }else{
+                throw new ClientProtocolException(String.format("server responsed non-200 code '%d'", statusCode));
             }
         } catch (Exception e) {
             throw new IOException(e);

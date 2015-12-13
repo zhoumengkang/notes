@@ -60,7 +60,7 @@ public class YarProtocol {
         return yarHeader;
     }
 
-    public static YarResponse responseFetch(byte[] responseByte){
+    public static YarResponse responseFetch(byte[] responseByte) throws IOException {
 
         YarResponse yarResponse = new YarResponse();
 
@@ -70,6 +70,10 @@ public class YarProtocol {
         }
 
         YarHeader yarHeader = YarProtocol.parse(header);
+        if(yarHeader == null){
+            // TODO
+            throw new IOException("malformed response header");
+        }
 
         byte[] packager = new byte[YAR_PACKAGER_NAME_LENGTH];
         int packagerLength = 0;
