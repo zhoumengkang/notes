@@ -27,7 +27,6 @@ abstract public class YarPackager {
     public abstract YarResponse unpack(byte[] content);
 
     public static YarPackager get(String packagerName) throws Exception {
-        packagerName = packagerName.toLowerCase();
         YarPackager yarPackager = yarPackagerMap.get(packagerName.toLowerCase());
         if (yarPackager == null) {
             String exception  = String.format("unsupported packager %s", packagerName);

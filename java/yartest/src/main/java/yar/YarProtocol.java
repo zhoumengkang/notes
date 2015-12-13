@@ -112,8 +112,7 @@ public class YarProtocol {
 
             body = bodyOut.toByteArray();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new IOException(e);
         } finally {
             bodyOut.close();
         }
