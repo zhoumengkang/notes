@@ -9,7 +9,7 @@ import java.util.Map;
 public class YarTransportFactory {
 
     public static final String YAR_TRANSPORT_HTTP      = "http";
-    public static final String YAR_TRANSPORT_SOCKET    = "sock";
+    public static final String YAR_TRANSPORT_SOCKET    = "socket";
 
     public static Map<String,YarTransport> yarTransportMap;
 
@@ -20,7 +20,7 @@ public class YarTransportFactory {
     public static void register(){
         yarTransportMap = new HashMap<>();
         yarTransportMap.put(YAR_TRANSPORT_HTTP.toLowerCase(),new HttpTransport());
-        yarTransportMap.put(YAR_TRANSPORT_SOCKET.toLowerCase(),new HttpTransport());
+        yarTransportMap.put(YAR_TRANSPORT_SOCKET.toLowerCase(),new SocketTransport());
     }
 
     public static YarTransport get(String yarTransportName) {
