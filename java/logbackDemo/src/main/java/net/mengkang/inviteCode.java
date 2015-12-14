@@ -94,6 +94,11 @@ public class inviteCode {
         return code;
     }
 
+    /**
+     * 从邀请获取用户 id
+     * @param code
+     * @return
+     */
     public static int codeRecover(String code){
         int len = code.indexOf(stopChar);
         if (len > 0) {
