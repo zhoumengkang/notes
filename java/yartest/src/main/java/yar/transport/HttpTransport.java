@@ -11,7 +11,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import yar.YarConfig;
-import yar.YarProtocol;
+import yar.protocol.YarProtocol;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 

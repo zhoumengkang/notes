@@ -1,7 +1,8 @@
-package yar;
+package yar.protocol;
 
+import yar.YarClient;
+import yar.YarConfig;
 import yar.packager.YarPackager;
-import yar.protocol.*;
 
 import java.io.*;
 import java.util.Arrays;
@@ -87,7 +88,7 @@ public class YarProtocol {
         }
 
         String packagerName = new String(packager);
-        YarClient.debug(packagerName);
+//        YarClient.debug(packagerName);
         yarResponse.setPackagerName(packagerName.substring(0, packagerLength));
 
         int off = YAR_HEADER_LENGTH + YAR_PACKAGER_NAME_LENGTH;
