@@ -54,27 +54,4 @@ public class YarClient {
 
     }
 
-    /**
-     * 调试用
-     * @param params
-     */
-    public static void debug(Object... params) {
-        if (YarConfig.getBoolean("yar.debug")){
-
-            StackTraceElement[] steArray = Thread.currentThread().getStackTrace();
-
-            StringBuilder sb = new StringBuilder("YAR_DEBUG ");
-
-            sb.append(steArray[2].getClassName()).append(" line: ").append(steArray[2].getLineNumber());
-
-            for (int i = 0,len = params.length; i < len; i++) {
-                sb.append(" : ").append(params[i].toString());
-            }
-
-            sb.append("\n");
-
-            System.out.println(sb.toString());
-        }
-    }
-
 }

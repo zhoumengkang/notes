@@ -1,5 +1,7 @@
 package yar.concurrent.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import yar.YarConfig;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
@@ -15,6 +17,8 @@ import java.util.concurrent.*;
  * Created by zhoumengkang on 2/12/15.
  */
 public class YarConcurrentClient {
+
+    protected final static Logger logger = LoggerFactory.getLogger(YarConcurrentClient.class);
 
     private static ExecutorService executorService;
     private static List<YarConcurrentTask> yarConcurrentTasks;
@@ -49,7 +53,7 @@ public class YarConcurrentClient {
 
         for(Future<Object> future:result){
             try {
-                System.out.println(System.currentTimeMillis() + " 返回值: " + future.get());
+                logger.info("返回值"+future.get().toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
@@ -72,7 +76,8 @@ public class YarConcurrentClient {
         }
 
         public Object call() throws Exception {
-            System.out.println(System.currentTimeMillis() + " : " + Thread.currentThread().getName());
+
+            logger.debug("开始处理任务" + yarConcurrentTask.getId());
 
             YarResponse yarResponse = null;
 
