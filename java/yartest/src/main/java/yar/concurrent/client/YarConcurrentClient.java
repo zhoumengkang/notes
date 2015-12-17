@@ -2,7 +2,6 @@ package yar.concurrent.client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import yar.YarConfig;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 import yar.transport.YarTransport;
@@ -28,17 +27,18 @@ public class YarConcurrentClient {
     }
 
     private static void init(){
-        yarConcurrentTasks = new ArrayList<YarConcurrentTask>();
+        yarConcurrentTasks = new ArrayList<>();
         executorService = Executors.newCachedThreadPool();
     }
 
     public static void call(YarConcurrentTask yarConcurrentTask) {
+        yarConcurrentTask.setId(yarConcurrentTasks.size() + 1);
         yarConcurrentTasks.add(yarConcurrentTask);
     }
 
-    public static void loop() {
+    public static boolean loop(YarConcurrentCallback callback) {
 
-        List<Future<Object>> result =new ArrayList<Future<Object>>();
+        List<Future<Object>> result =new ArrayList<>();
 
         try{
             for (YarConcurrentTask task : yarConcurrentTasks){
@@ -46,25 +46,38 @@ public class YarConcurrentClient {
                 result.add(future);
             }
 
-        }catch(Exception e){
+            try {
+                callback.call();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
         }
 
 
         for(Future<Object> future:result){
             try {
-                logger.info("返回值"+future.get().toString());
+                if (future.get() != null){
+                    logger.info(future.get().toString());
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                return false;
             } catch (ExecutionException e) {
                 e.printStackTrace();
+                return false;
             }
         }
+
+        return true;
     }
 
     public static void reset(){
         yarConcurrentTasks = null;
-        yarConcurrentTasks = new ArrayList<YarConcurrentTask>();
+        yarConcurrentTasks = new ArrayList<>();
     }
 
     public static class YarClientCallable implements Callable<Object> {
@@ -85,19 +98,22 @@ public class YarConcurrentClient {
             yarRequest.setId(yarConcurrentTask.getId());
             yarRequest.setMethod(yarConcurrentTask.getMethod());
             yarRequest.setParameters(yarConcurrentTask.getParams());
-            yarRequest.setPackagerName(YarConfig.getString("yar.packager"));
+            yarRequest.setPackagerName(yarConcurrentTask.getPackagerName());
 
-            YarTransport yarTransport = YarTransportFactory.get(YarConfig.getString("yar.transport"));
-            yarTransport.open("http://10.211.55.4/yar/server/RewardScoreService.class.php");
+            YarTransport yarTransport = YarTransportFactory.get(yarConcurrentTask.getTransport());
+            yarTransport.open(yarConcurrentTask.getUri());
 
             try {
                 yarResponse = yarTransport.exec(yarRequest);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            assert yarResponse != null;
 
-            return yarResponse.getRetVal();
+            if (yarConcurrentTask.getCallback() != null){
+                assert yarResponse != null;
+                return yarConcurrentTask.getCallback().setRetValue(yarResponse.getRetVal()).call();
+            }
+            return null;
         }
     }
 
