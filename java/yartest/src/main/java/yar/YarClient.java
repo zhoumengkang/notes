@@ -16,9 +16,13 @@ public class YarClient {
     private String uri;
     private String packager;
 
-    public YarClient(String uri){
-        this.uri = uri;
-        this.packager = YarConfig.getString("yar.packager");
+    public YarClient(String uri) {
+        if(uriCheck(uri)){
+            this.uri = uri;
+            this.packager = YarConfig.getString("yar.packager");
+        }else{
+            throw new YarClientException(String.format(YarClientException.unsupportedProtocolAddress,uri));
+        }
     }
 
     public final Object useService(Class type) {
@@ -52,6 +56,19 @@ public class YarClient {
         assert yarResponse != null;
         return yarResponse.getRetVal();
 
+    }
+
+    /**
+     * 判断 uri 是否服务器是否支持
+     * @param uri
+     * @return
+     * @throws Exception
+     */
+    public boolean uriCheck(String uri) {
+        if (uri.startsWith("http://") || uri.startsWith("https://") || uri.startsWith("tcp://") || uri.startsWith("unix://")){
+            return true;
+        }
+        return false;
     }
 
 }

@@ -23,8 +23,8 @@ public abstract class YarConcurrentCallback {
         return this;
     }
 
-    abstract void async();
+    public abstract void async();
 
-    abstract Object success();
+    public abstract Object success();
 
 }
