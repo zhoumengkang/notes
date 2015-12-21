@@ -42,8 +42,8 @@ public class YarConcurrentClient {
         List<Future<Object>> result =new ArrayList<>();
 
         try{
-            for (YarConcurrentCallStack task : yarConcurrentCallStacks){
-                Future<Object> future = executorService.submit(new YarConcurrentClientHandle(task));
+            for (YarConcurrentCallStack callStack : yarConcurrentCallStacks){
+                Future<Object> future = executorService.submit(new Handle(callStack));
                 result.add(future);
             }
 
@@ -81,11 +81,11 @@ public class YarConcurrentClient {
         yarConcurrentCallStacks = new ArrayList<>();
     }
 
-    public static class YarConcurrentClientHandle implements Callable<Object> {
+    public static class Handle implements Callable<Object> {
 
         private YarConcurrentCallStack yarConcurrentCallStack;
 
-        public YarConcurrentClientHandle(YarConcurrentCallStack yarConcurrentCallStack) {
+        public Handle(YarConcurrentCallStack yarConcurrentCallStack) {
             this.yarConcurrentCallStack = yarConcurrentCallStack;
         }
 
