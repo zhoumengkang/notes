@@ -19,7 +19,7 @@ public class SupportService {
     /**
      * rpc api 地址
      */
-    private static String RewardScoreServiceUri = "http://10.211.55.4/yar/server/RewardScoreService.class.php";
+    private static String RewardScoreServiceUri = "http://mengkang.net/demo/yar-server/RewardScoreService.php";
 
     public static String add(int uid, int fid){
         YarClient yarClient  = new YarClient(RewardScoreServiceUri);

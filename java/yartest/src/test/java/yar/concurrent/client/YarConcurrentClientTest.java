@@ -11,7 +11,7 @@ public class YarConcurrentClientTest extends TestCase {
     /**
      * rpc api 地址
      */
-    private static String RewardScoreServiceUri = "http://10.211.55.4/yar/server/RewardScoreService.class.php";
+    static String RewardScoreServiceUri = "http://mengkang.net/demo/yar-server/RewardScoreService.php";
 
     public class callback extends YarConcurrentCallback {
 
@@ -29,6 +29,8 @@ public class YarConcurrentClientTest extends TestCase {
 
         String packagerName = YarConfig.getString("yar.packager");
 
+        YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
+        YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
         YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
         YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri,"post",new Object[]{1,2},packagerName,new callback()));
         YarConcurrentClient.loop(new callback());
