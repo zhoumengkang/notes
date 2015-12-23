@@ -108,6 +108,9 @@ public class YarConcurrentClient {
             try {
                 yarResponse = yarTransport.exec(yarRequest);
             } catch (IOException e) {
+                if (yarConcurrentTask.getErrorCallback() != null) {
+                    yarConcurrentTask.getErrorCallback().error();
+                }
                 e.printStackTrace();
             }
 

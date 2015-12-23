@@ -12,7 +12,13 @@ public class SupportServiceTest extends TestCase {
     }
 
     public void testPost() throws Exception {
-        String res = SupportService.post(1, 2);
-        System.out.println(res);
+        long a = System.currentTimeMillis();
+
+        for (int i = 0; i < 100; i++) {
+            String res = SupportService.post(1, 2);
+            System.out.println(res);
+        }
+
+        System.out.println(System.currentTimeMillis() - a);
     }
 }

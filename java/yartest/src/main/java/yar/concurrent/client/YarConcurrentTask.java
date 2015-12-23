@@ -1,6 +1,7 @@
 package yar.concurrent.client;
 
 import yar.YarClientException;
+import yar.YarConfig;
 import yar.YarConstants;
 import yar.client.YarClientOptions;
 
@@ -15,6 +16,7 @@ public class YarConcurrentTask {
     private int protocol;
     private String packagerName;
     private YarConcurrentCallback callback;
+    private YarConcurrentErrorCallback errorCallback;
     private YarClientOptions yarClientOptions;
 
     public YarConcurrentTask(String uri, String method, Object[] params, String packagerName, YarConcurrentCallback callback) {
@@ -23,7 +25,19 @@ public class YarConcurrentTask {
         this.params = params;
         this.packagerName = packagerName;
         this.callback = callback;
+        init(uri,null);
+    }
 
+    public YarConcurrentTask(String uri, String method, Object[] params, String packagerName, YarConcurrentCallback callback, YarClientOptions yarClientOptions) {
+        this.uri = uri;
+        this.method = method;
+        this.params = params;
+        this.packagerName = packagerName;
+        this.callback = callback;
+        init(uri,yarClientOptions);
+    }
+
+    private void init(String uri,YarClientOptions yarClientOptions){
         if (uri.startsWith("http://") | uri.startsWith("https://")) {
             this.protocol = YarConstants.YAR_CLIENT_PROTOCOL_HTTP;
         } else if (uri.startsWith("tcp://")) {
@@ -34,6 +48,25 @@ public class YarConcurrentTask {
             this.protocol = YarConstants.YAR_CLIENT_PROTOCOL_UNIX;
         } else {
             throw new YarClientException(String.format(YarClientException.unsupportedProtocolAddress,uri));
+        }
+
+        this.yarClientOptions = new YarClientOptions();
+
+        if (yarClientOptions != null) {
+            this.yarClientOptions = yarClientOptions;
+        }
+
+        if (this.yarClientOptions.getConnect_timeout() <= 0) {
+            this.yarClientOptions.setConnect_timeout(YarConfig.getInt("yar.connect.timeout"));
+        }
+        if (this.yarClientOptions.getPackager() == null) {
+            this.yarClientOptions.setPackager(YarConfig.getString("yar.packager"));
+        }
+        if (this.yarClientOptions.getPersistent() <= 0) {
+            this.yarClientOptions.setPersistent(YarConfig.getInt("yar.persistent"));
+        }
+        if (this.yarClientOptions.getTimeout() <= 0) {
+            this.yarClientOptions.setTimeout(YarConfig.getInt("yar.timeout"));
         }
     }
 
@@ -114,5 +147,13 @@ public class YarConcurrentTask {
 
     public void setYarClientOptions(YarClientOptions yarClientOptions) {
         this.yarClientOptions = yarClientOptions;
+    }
+
+    public YarConcurrentErrorCallback getErrorCallback() {
+        return errorCallback;
+    }
+
+    public void setErrorCallback(YarConcurrentErrorCallback errorCallback) {
+        this.errorCallback = errorCallback;
     }
 }
