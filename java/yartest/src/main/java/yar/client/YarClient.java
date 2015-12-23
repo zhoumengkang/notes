@@ -90,7 +90,7 @@ public class YarClient {
         yarRequest.setPackagerName(this.options.getPackager());
 
         YarTransport yarTransport = YarTransportFactory.get(this.protocol);
-        yarTransport.open(this.uri);
+        yarTransport.open(this.uri,this.options);
 
         try {
             yarResponse = yarTransport.exec(yarRequest);

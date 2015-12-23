@@ -1,5 +1,6 @@
 package yar.transport;
 
+import yar.client.YarClientOptions;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 
@@ -10,7 +11,7 @@ import java.io.IOException;
  */
 public class SocketTransport implements YarTransport {
     @Override
-    public void open(String url) {
+    public void open(String url,YarClientOptions yarClientOptions) {
 
     }
 

@@ -10,4 +10,9 @@ public class SupportServiceTest extends TestCase {
         String res = SupportService.add(1, 2);
         System.out.println(res);
     }
+
+    public void testPost() throws Exception {
+        String res = SupportService.post(1, 2);
+        System.out.println(res);
+    }
 }

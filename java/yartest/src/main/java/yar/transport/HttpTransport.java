@@ -11,6 +11,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import yar.YarConfig;
+import yar.client.YarClientOptions;
 import yar.protocol.YarProtocol;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
@@ -28,12 +29,12 @@ public class HttpTransport implements YarTransport{
     private CloseableHttpResponse httpResponse = null;
 
     @Override
-    public void open(String url) {
+    public void open(String url,YarClientOptions yarClientOptions) {
         this.url = url;
         this.httpClient = HttpClients.createDefault();
         this.requestConfig = RequestConfig.custom()
-                .setSocketTimeout(YarConfig.getInt("yar.timeout"))
-                .setConnectTimeout(YarConfig.getInt("yar.connect.timeout")).build();
+                .setSocketTimeout(yarClientOptions.getTimeout())
+                .setConnectTimeout(yarClientOptions.getConnect_timeout()).build();
 
 
     }

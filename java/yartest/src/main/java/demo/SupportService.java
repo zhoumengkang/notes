@@ -1,11 +1,7 @@
 package demo;
 
-import yar.YarConstants;
 import yar.client.YarClient;
-import yar.YarConfig;
-import yar.concurrent.client.YarConcurrentCallback;
-import yar.concurrent.client.YarConcurrentClient;
-import yar.concurrent.client.YarConcurrentTask;
+import yar.client.YarClientOptions;
 
 /**
  * Created by zhoumengkang on 3/12/15.
@@ -32,7 +28,8 @@ public class SupportService {
     }
 
     public static String post(int uid, int fid){
-        YarClient yarClient  = new YarClient(RewardScoreServiceUri);
+        YarClientOptions yarClientOptions = new YarClientOptions();
+        YarClient yarClient  = new YarClient(RewardScoreServiceUri,yarClientOptions);
         RewardScoreService rewardScoreService = (RewardScoreService) yarClient.useService(RewardScoreService.class);
         return rewardScoreService.post(uid, fid);
     }
