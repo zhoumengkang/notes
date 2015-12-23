@@ -38,11 +38,6 @@ public class HttpTransport implements YarTransport{
     }
 
     @Override
-    public void send() {
-
-    }
-
-    @Override
     public YarResponse exec(YarRequest yarRequest) throws IOException {
         HttpPost httpPost = new HttpPost(this.url);
         httpPost.setConfig(this.requestConfig);
@@ -72,15 +67,5 @@ public class HttpTransport implements YarTransport{
         }
 
         return null;
-    }
-
-    @Override
-    public void calldata() {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 }

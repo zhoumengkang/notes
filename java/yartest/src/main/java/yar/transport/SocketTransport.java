@@ -11,27 +11,12 @@ import java.io.IOException;
  */
 public class SocketTransport implements YarTransport {
     @Override
-    public void open(String url,YarClientOptions yarClientOptions) {
-
-    }
-
-    @Override
-    public void send() {
+    public void open(String url, YarClientOptions yarClientOptions) {
 
     }
 
     @Override
     public YarResponse exec(YarRequest yarRequest) throws IOException {
         return null;
-    }
-
-    @Override
-    public void calldata() {
-
-    }
-
-    @Override
-    public void close() {
-
     }
 }
