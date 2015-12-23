@@ -35,8 +35,6 @@ public class HttpTransport implements YarTransport{
         this.requestConfig = RequestConfig.custom()
                 .setSocketTimeout(yarClientOptions.getTimeout())
                 .setConnectTimeout(yarClientOptions.getConnect_timeout()).build();
-
-
     }
 
     @Override

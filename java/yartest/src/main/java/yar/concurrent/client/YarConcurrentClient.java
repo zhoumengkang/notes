@@ -97,13 +97,13 @@ public class YarConcurrentClient {
             YarResponse yarResponse = null;
 
             YarRequest yarRequest = new YarRequest();
-            yarRequest.setId(yarConcurrentTask.getId());
-            yarRequest.setMethod(yarConcurrentTask.getMethod());
-            yarRequest.setParameters(yarConcurrentTask.getParams());
-            yarRequest.setPackagerName(yarConcurrentTask.getPackagerName());
+            yarRequest.setId(yarConcurrentTask.getId())
+                    .setMethod(yarConcurrentTask.getMethod())
+                    .setParameters(yarConcurrentTask.getParams())
+                    .setPackagerName(yarConcurrentTask.getPackagerName());
 
             YarTransport yarTransport = YarTransportFactory.get(yarConcurrentTask.getProtocol());
-            yarTransport.open(yarConcurrentTask.getUri());
+            yarTransport.open(yarConcurrentTask.getUri(),yarConcurrentTask.getYarClientOptions());
 
             try {
                 yarResponse = yarTransport.exec(yarRequest);

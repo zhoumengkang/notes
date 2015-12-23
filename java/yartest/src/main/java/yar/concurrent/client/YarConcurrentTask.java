@@ -2,6 +2,7 @@ package yar.concurrent.client;
 
 import yar.YarClientException;
 import yar.YarConstants;
+import yar.client.YarClientOptions;
 
 /**
  * Created by zhoumengkang on 16/12/15.
@@ -14,6 +15,7 @@ public class YarConcurrentTask {
     private int protocol;
     private String packagerName;
     private YarConcurrentCallback callback;
+    private YarClientOptions yarClientOptions;
 
     public YarConcurrentTask(String uri, String method, Object[] params, String packagerName, YarConcurrentCallback callback) {
         this.uri = uri;
@@ -104,5 +106,13 @@ public class YarConcurrentTask {
 
     public void setCallback(YarConcurrentCallback callback) {
         this.callback = callback;
+    }
+
+    public YarClientOptions getYarClientOptions() {
+        return yarClientOptions;
+    }
+
+    public void setYarClientOptions(YarClientOptions yarClientOptions) {
+        this.yarClientOptions = yarClientOptions;
     }
 }

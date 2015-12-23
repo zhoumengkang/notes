@@ -84,10 +84,10 @@ public class YarClient {
         YarResponse yarResponse = null;
 
         YarRequest yarRequest = new YarRequest();
-        yarRequest.setId(123456789);
-        yarRequest.setMethod(method);
-        yarRequest.setParameters(args);
-        yarRequest.setPackagerName(this.options.getPackager());
+        yarRequest.setId(123456789)
+                .setMethod(method)
+                .setParameters(args)
+                .setPackagerName(this.options.getPackager());
 
         YarTransport yarTransport = YarTransportFactory.get(this.protocol);
         yarTransport.open(this.uri,this.options);

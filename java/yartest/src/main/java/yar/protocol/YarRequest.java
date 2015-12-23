@@ -17,31 +17,35 @@ public class YarRequest {
         return packagerName;
     }
 
-    public void setPackagerName(String packagerName) {
+    public YarRequest setPackagerName(String packagerName) {
         this.packagerName = packagerName;
+        return this;
     }
 
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public YarRequest setId(long id) {
         this.id = id;
+        return this;
     }
 
     public String getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
+    public YarRequest setMethod(String method) {
         this.method = method;
+        return this;
     }
 
     public Object[] getParameters() {
         return parameters;
     }
 
-    public void setParameters(Object[] parameters) {
+    public YarRequest setParameters(Object[] parameters) {
         this.parameters = parameters;
+        return this;
     }
 }
