@@ -1,5 +1,6 @@
 package yar.packager;
 
+import org.json.JSONObject;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 
@@ -12,9 +13,9 @@ import java.util.Map;
  */
 abstract public class YarPackager {
 
-    public static final String YAR_PACKAGER_PHP      = "PHP";
-    public static final String 	YAR_PACKAGER_JSON    =  "JSON";
-    public static final String 	YAR_PACKAGER_MSGPACK = "MSGPACK";
+    public static final String YAR_PACKAGER_PHP     = "PHP";
+    public static final String YAR_PACKAGER_JSON    = "JSON";
+    public static final String YAR_PACKAGER_MSGPACK = "MSGPACK";
 
     public static Map<String,YarPackager> yarPackagerMap;
 
@@ -40,7 +41,7 @@ abstract public class YarPackager {
         yarPackagerMap = new HashMap<>();
         yarPackagerMap.put(YAR_PACKAGER_PHP.toLowerCase(),new PhpPackger());
         yarPackagerMap.put(YAR_PACKAGER_JSON.toLowerCase(),new JsonPackager());
-        yarPackagerMap.put(YAR_PACKAGER_MSGPACK.toLowerCase(),new MsgPackger());
+        yarPackagerMap.put(YAR_PACKAGER_MSGPACK.toLowerCase(),new MsgpackPackager());
     }
 
     public static Map<String,Object> requestFormat(YarRequest yarRequest){
@@ -50,6 +51,17 @@ abstract public class YarPackager {
         request.put("p", yarRequest.getParameters());
 
         return request;
+    }
+
+    public static YarResponse responseFormat(String data) {
+        JSONObject jsonObject = new JSONObject(data);
+        YarResponse yarResponse = new YarResponse();
+        yarResponse.setId(jsonObject.getLong("i"));
+        yarResponse.setStatus(jsonObject.getInt("s"));
+        yarResponse.setOut(jsonObject.getString("o"));
+        yarResponse.setRetVal(jsonObject.get("r"));
+
+        return yarResponse;
     }
 
 }

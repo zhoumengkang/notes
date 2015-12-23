@@ -20,13 +20,6 @@ public class JsonPackager extends YarPackager {
 
     @Override
     public YarResponse unpack(byte[] content) {
-        JSONObject jsonObject = new JSONObject(new String(content));
-        YarResponse yarResponse = new YarResponse();
-        yarResponse.setId(jsonObject.getLong("i"));
-        yarResponse.setStatus(jsonObject.getInt("s"));
-        yarResponse.setOut(jsonObject.getString("o"));
-        yarResponse.setRetVal(jsonObject.get("r"));
-
-        return yarResponse;
+        return responseFormat(new String(content));
     }
 }

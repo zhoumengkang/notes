@@ -6,10 +6,10 @@ import yar.protocol.YarResponse;
 /**
  * Created by zhoumengkang on 11/12/15.
  */
-public class MsgPackger extends YarPackager {
+public class MsgpackPackager extends YarPackager {
     @Override
     public byte[] pack(YarRequest yarRequest) {
-        return new byte[0];
+        return null;
     }
 
     @Override
