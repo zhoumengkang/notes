@@ -1,7 +1,6 @@
 package yar.packager;
 
 import org.json.JSONObject;
-import yar.YarClient;
 import yar.protocol.YarRequest;
 import yar.protocol.YarResponse;
 

@@ -20,7 +20,7 @@ public class YarConcurrentClient {
     protected final static Logger logger = LoggerFactory.getLogger(YarConcurrentClient.class);
 
     private static ExecutorService executorService;
-    private static List<YarConcurrentCallStack> yarConcurrentCallStacks;
+    private static List<YarConcurrentTask> yarConcurrentCallStack;
     private static int YAR_PROTOCOL_PERSISTENT = 0;
 
     static{
@@ -28,13 +28,13 @@ public class YarConcurrentClient {
     }
 
     private static void init(){
-        yarConcurrentCallStacks = new ArrayList<>();
+        yarConcurrentCallStack = new ArrayList<>();
         executorService = Executors.newCachedThreadPool();
     }
 
-    public static void call(YarConcurrentCallStack yarConcurrentCallStack) {
-        yarConcurrentCallStack.setId(yarConcurrentCallStacks.size() + 1);
-        yarConcurrentCallStacks.add(yarConcurrentCallStack);
+    public static void call(YarConcurrentTask yarConcurrentTask) {
+        yarConcurrentTask.setId(yarConcurrentCallStack.size() + 1);
+        yarConcurrentCallStack.add(yarConcurrentTask);
     }
 
     public static boolean loop(YarConcurrentCallback callback) {
@@ -42,7 +42,7 @@ public class YarConcurrentClient {
         List<Future<Object>> result =new ArrayList<>();
 
         try{
-            for (YarConcurrentCallStack callStack : yarConcurrentCallStacks){
+            for (YarConcurrentTask callStack : yarConcurrentCallStack){
                 Future<Object> future = executorService.submit(new Handle(callStack));
                 result.add(future);
             }
@@ -77,33 +77,33 @@ public class YarConcurrentClient {
     }
 
     public static void reset(){
-        yarConcurrentCallStacks = null;
-        yarConcurrentCallStacks = new ArrayList<>();
+        yarConcurrentCallStack = null;
+        yarConcurrentCallStack = new ArrayList<>();
     }
 
     public static class Handle implements Callable<Object> {
 
-        private YarConcurrentCallStack yarConcurrentCallStack;
+        private YarConcurrentTask yarConcurrentTask;
 
-        public Handle(YarConcurrentCallStack yarConcurrentCallStack) {
-            this.yarConcurrentCallStack = yarConcurrentCallStack;
+        public Handle(YarConcurrentTask yarConcurrentTask) {
+            this.yarConcurrentTask = yarConcurrentTask;
         }
 
         public Object call() throws Exception {
 
             logger.debug(String.format("%d: call api '%s' at (%c)'%s' with '%s' parameters",
-                    yarConcurrentCallStack.getId(), yarConcurrentCallStack.getMethod(), (YarConcurrentClient.YAR_PROTOCOL_PERSISTENT > 0) ? 'p' : 'r', yarConcurrentCallStack.getUri(),yarConcurrentCallStack.getParamsString()));
+                    yarConcurrentTask.getId(), yarConcurrentTask.getMethod(), (YarConcurrentClient.YAR_PROTOCOL_PERSISTENT > 0) ? 'p' : 'r', yarConcurrentTask.getUri(), yarConcurrentTask.getParamsString()));
 
             YarResponse yarResponse = null;
 
             YarRequest yarRequest = new YarRequest();
-            yarRequest.setId(yarConcurrentCallStack.getId());
-            yarRequest.setMethod(yarConcurrentCallStack.getMethod());
-            yarRequest.setParameters(yarConcurrentCallStack.getParams());
-            yarRequest.setPackagerName(yarConcurrentCallStack.getPackagerName());
+            yarRequest.setId(yarConcurrentTask.getId());
+            yarRequest.setMethod(yarConcurrentTask.getMethod());
+            yarRequest.setParameters(yarConcurrentTask.getParams());
+            yarRequest.setPackagerName(yarConcurrentTask.getPackagerName());
 
-            YarTransport yarTransport = YarTransportFactory.get(yarConcurrentCallStack.getTransport());
-            yarTransport.open(yarConcurrentCallStack.getUri());
+            YarTransport yarTransport = YarTransportFactory.get(yarConcurrentTask.getProtocol());
+            yarTransport.open(yarConcurrentTask.getUri());
 
             try {
                 yarResponse = yarTransport.exec(yarRequest);
@@ -111,9 +111,9 @@ public class YarConcurrentClient {
                 e.printStackTrace();
             }
 
-            if (yarConcurrentCallStack.getCallback() != null){
+            if (yarConcurrentTask.getCallback() != null){
                 assert yarResponse != null;
-                return yarConcurrentCallStack.getCallback().setRetValue(yarResponse.getRetVal()).call();
+                return yarConcurrentTask.getCallback().setRetValue(yarResponse.getRetVal()).call();
             }
             return null;
         }

@@ -1,6 +1,5 @@
 package yar.protocol;
 
-import yar.YarClient;
 import yar.YarConfig;
 import yar.packager.YarPackager;
 

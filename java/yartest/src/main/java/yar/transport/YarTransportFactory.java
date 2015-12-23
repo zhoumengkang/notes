@@ -1,5 +1,7 @@
 package yar.transport;
 
+import yar.YarConstants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,10 +10,7 @@ import java.util.Map;
  */
 public class YarTransportFactory {
 
-    public static final String YAR_TRANSPORT_HTTP      = "http";
-    public static final String YAR_TRANSPORT_SOCKET    = "socket";
-
-    public static Map<String,YarTransport> yarTransportMap;
+    public static Map<Integer,YarTransport> yarTransportMap;
 
     static{
         register();
@@ -19,14 +18,16 @@ public class YarTransportFactory {
 
     public static void register(){
         yarTransportMap = new HashMap<>();
-        yarTransportMap.put(YAR_TRANSPORT_HTTP.toLowerCase(),new HttpTransport());
-        yarTransportMap.put(YAR_TRANSPORT_SOCKET.toLowerCase(),new SocketTransport());
+        yarTransportMap.put(YarConstants.YAR_CLIENT_PROTOCOL_HTTP,new HttpTransport());
+        yarTransportMap.put(YarConstants.YAR_CLIENT_PROTOCOL_TCP,new SocketTransport());
+        yarTransportMap.put(YarConstants.YAR_CLIENT_PROTOCOL_UDP,new SocketTransport());
+        yarTransportMap.put(YarConstants.YAR_CLIENT_PROTOCOL_UNIX,new SocketTransport());
     }
 
-    public static YarTransport get(String yarTransportName) {
-        YarTransport yarTransport = yarTransportMap.get(yarTransportName.toLowerCase());
+    public static YarTransport get(int yarTransportType) {
+        YarTransport yarTransport = yarTransportMap.get(yarTransportType);
         if (yarTransport == null) {
-            String exception  = String.format("unsupported protocol %s", yarTransportName);
+            String exception  = String.format("unsupported protocol %d", yarTransportType);
             throw new IllegalArgumentException(exception);
         } else {
             return yarTransport;

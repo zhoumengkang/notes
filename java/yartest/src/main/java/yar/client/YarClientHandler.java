@@ -1,4 +1,5 @@
-package yar;
+package yar.client;
+
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -6,11 +7,11 @@ import java.lang.reflect.Method;
 /**
  * Created by zhoumengkang on 3/12/15.
  */
-final class YarClientInvocationHandler implements InvocationHandler {
+final class YarClientHandler implements InvocationHandler {
 
     private YarClient yarClient;
 
-    YarClientInvocationHandler(YarClient yarClient) {
+    YarClientHandler(YarClient yarClient) {
         this.yarClient = yarClient;
     }
 
