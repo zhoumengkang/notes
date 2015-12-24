@@ -29,10 +29,13 @@ public class YarConcurrentClientTest extends TestCase {
 
         String packagerName = YarConfig.getString("yar.packager");
 
-        YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
-        YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
-        YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
-        YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri,"post",new Object[]{1,2},packagerName,new callback()));
+        for (int i = 0; i < 20; i++) {
+            YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri, "support", new Object[]{1, 2}, packagerName, new callback()));
+        }
+        for (int i = 0; i < 20; i++) {
+            YarConcurrentClient.call(new YarConcurrentTask(RewardScoreServiceUri,"post",new Object[]{1,2},packagerName,new callback()));
+        }
+
         YarConcurrentClient.loop(new callback());
         YarConcurrentClient.reset();
     }

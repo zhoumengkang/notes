@@ -33,4 +33,17 @@ public class YarTransportFactory {
             return yarTransport;
         }
     }
+
+    public static YarTransport concurrentGet(int yarTransportType) {
+        if (!yarTransportMap.containsKey(yarTransportType)) {
+            String exception  = String.format("unsupported protocol %d", yarTransportType);
+            throw new IllegalArgumentException(exception);
+        }
+
+        if (yarTransportType == YarConstants.YAR_CLIENT_PROTOCOL_HTTP) {
+            return new HttpTransport();
+        }else{
+            return new SocketTransport();
+        }
+    }
 }
