@@ -102,7 +102,7 @@ public class YarConcurrentClient {
                     .setParameters(yarConcurrentTask.getParams())
                     .setPackagerName(yarConcurrentTask.getPackagerName());
 
-            YarTransport yarTransport = YarTransportFactory.concurrentGet(yarConcurrentTask.getProtocol());
+            YarTransport yarTransport = YarTransportFactory.get(yarConcurrentTask.getProtocol());
             yarTransport.open(yarConcurrentTask.getUri(),yarConcurrentTask.getYarClientOptions());
 
             try {
