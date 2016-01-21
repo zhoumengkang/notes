@@ -40,4 +40,13 @@ public class User {
                 ", sex=" + sex +
                 '}';
     }
+
+    public User(String name, int sex) {
+        this.name = name;
+        this.sex = sex;
+    }
+
+    public User() {
+    }
+
 }

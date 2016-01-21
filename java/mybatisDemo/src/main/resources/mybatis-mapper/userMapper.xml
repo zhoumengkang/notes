@@ -2,8 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="net.mengkang.demo.models.UserMapper">
-    <select id="GetUserByID" parameterType="int" resultType="User">
+<mapper namespace="net.mengkang.mappers.user">
+    <select id="getUserByID" parameterType="int" resultType="User">
         select * from `user` where id = #{id}
     </select>
+
+    <insert id="add"
+            useGeneratedKeys="true" keyColumn="id" keyProperty="id"
+            parameterType="net.mengkang.demo.models.User">
+        insert into `user` (`name`,sex) VALUES (#{name},#{sex})
+    </insert>
 </mapper>

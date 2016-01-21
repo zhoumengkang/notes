@@ -9,7 +9,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class Test {
+public class SqlSessionDemo {
     public static void main(String[] args) {
         String resource = "mybatis-config.xml";
         InputStream inputStream = null;
@@ -20,14 +20,26 @@ public class Test {
         }
         SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
 
-        SqlSession session = sqlSessionFactory.openSession();
+        SqlSession session1 = sqlSessionFactory.openSession();
         try {
-            User user = (User) session.selectOne("net.mengkang.demo.models.UserMapper.GetUserByID", 6);
+            User user = new User("mengkang", 1);
+            int count = session1.insert("net.mengkang.mappers.user.add", user);
+            session1.commit();
+            System.out.println(user.getId()); // 这样即可获取刚刚插入的 id，线程安全吗？
+        } finally {
+            session1.close();
+        }
+
+        SqlSession session2 = sqlSessionFactory.openSession();
+        try {
+            User user = session2.selectOne("net.mengkang.mappers.user.getUserByID", 1);
             if (user != null){
                 System.out.println(user.toString());
             }
         } finally {
-            session.close();
+            session2.close();
         }
+
+
     }
 }
