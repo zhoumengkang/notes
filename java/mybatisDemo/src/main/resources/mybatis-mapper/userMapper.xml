@@ -4,12 +4,16 @@
 
 <mapper namespace="net.mengkang.mappers.user">
     <select id="getUserByID" parameterType="int" resultType="User">
-        select * from `user` where id = #{id}
+        SELECT * FROM `user` WHERE id=#{id}
     </select>
 
     <insert id="add"
             useGeneratedKeys="true" keyColumn="id" keyProperty="id"
             parameterType="net.mengkang.demo.models.User">
-        insert into `user` (`name`,sex) VALUES (#{name},#{sex})
+        INSERT INTO `user` (`name`,sex) VALUES (#{name},#{sex})
     </insert>
+
+    <delete id="del" parameterType="int">
+        DELETE FROM `user` WHERE id=#{id}
+    </delete>
 </mapper>

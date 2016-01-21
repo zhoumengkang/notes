@@ -40,6 +40,13 @@ public class SqlSessionDemo {
             session2.close();
         }
 
+        SqlSession session3 = sqlSessionFactory.openSession();
+        try {
+            int count = session3.delete("net.mengkang.mappers.user.del",8);
+            session3.commit();
+        } finally {
+            session3.close();
+        }
 
     }
 }
