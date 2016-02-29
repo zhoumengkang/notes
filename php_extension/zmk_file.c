@@ -39,7 +39,7 @@ static void zmk_file_dtor(zend_rsrc_list_entry *rsrc TSRMLS_DC){
 const zend_function_entry zmk_file_functions[] = {
 	PHP_FE(file_open,	NULL)
 	PHP_FE(file_read,	NULL)
-	PHP_FE(file_close,NULL)
+	PHP_FE(file_close,	NULL)
 	PHP_FE_END	/* Must be the last line in zmk_file_functions[] */
 };
 /* }}} */
