@@ -1,0 +1,13 @@
+// $Id$
+// vim:ft=javascript
+
+// If your extension references something external, use ARG_WITH
+// ARG_WITH("zmk_file", "for zmk_file support", "no");
+
+// Otherwise, use ARG_ENABLE
+// ARG_ENABLE("zmk_file", "enable zmk_file support", "no");
+
+if (PHP_ZMK_FILE != "no") {
+	EXTENSION("zmk_file", "zmk_file.c");
+}
+
