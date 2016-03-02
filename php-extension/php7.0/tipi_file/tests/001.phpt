@@ -1,10 +1,10 @@
 --TEST--
-Check for zmk_file presence
+Check for tipi_file presence
 --SKIPIF--
-<?php if (!extension_loaded("zmk_file")) print "skip"; ?>
+<?php if (!extension_loaded("tipi_file")) print "skip"; ?>
 --FILE--
 <?php 
-echo "zmk_file extension is available";
+echo "tipi_file extension is available";
 /*
 	you can add regression tests for your extension here
 
@@ -13,9 +13,9 @@ echo "zmk_file extension is available";
   to pass, differences between the output and the
   expected text are interpreted as failure
 
-	see php5/README.TESTING for further information on
+	see php7/README.TESTING for further information on
   writing regression tests
 */
 ?>
 --EXPECT--
-zmk_file extension is available
+tipi_file extension is available

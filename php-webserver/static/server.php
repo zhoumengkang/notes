@@ -65,6 +65,8 @@ class server {
      */
     private function output($request_string){
 
+        echo $request_string;
+
         // 静态 GET /1.html HTTP/1.1 ...
 
         $request_array = explode(" ",$request_string);
