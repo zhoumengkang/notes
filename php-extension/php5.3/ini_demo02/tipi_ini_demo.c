@@ -166,7 +166,8 @@ PHP_FUNCTION(confirm_tipi_ini_demo_compiled)
     */
 PHP_FUNCTION(get_demo_init_value)
 {
-	RETURN_LONG(TIPI_INI_DEMO_G(global_value));
+//	RETURN_LONG(TIPI_INI_DEMO_G(global_value));
+	RETURN_LONG(INI_INT("tipi_ini_demo.global_value"));
 }
 /* }}} */
 
