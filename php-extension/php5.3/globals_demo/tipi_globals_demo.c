@@ -79,13 +79,12 @@ PHP_INI_END()
 
 /* {{{ php_tipi_globals_demo_init_globals
  */
-/* Uncomment this function if you have INI entries
+
 static void php_tipi_globals_demo_init_globals(zend_tipi_globals_demo_globals *tipi_globals_demo_globals)
 {
 	tipi_globals_demo_globals->global_value = 0;
-	tipi_globals_demo_globals->global_string = NULL;
 }
-*/
+
 /* }}} */
 
 /* {{{ PHP_MINIT_FUNCTION
@@ -115,7 +114,8 @@ PHP_MSHUTDOWN_FUNCTION(tipi_globals_demo)
  */
 PHP_RINIT_FUNCTION(tipi_globals_demo)
 {
-	TIPI_GLOBALS_DEMO_G(global_value) = 0;
+	// TIPI_GLOBALS_DEMO_G(global_value) = 0;
+	ZEND_INIT_MODULE_GLOBALS(tipi_globals_demo, php_tipi_globals_demo_init_globals, NULL)
 	return SUCCESS;
 }
 /* }}} */
