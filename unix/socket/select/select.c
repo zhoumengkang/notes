@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -18,7 +19,7 @@ int main(void) {
     int lfd, cfd, maxfd, scokfd, retval;
     struct sockaddr_in serv_addr, clin_addr;
 
-    socklen_t clin_len;               //地址信息结构体大小
+    socklen_t clin_len; // 地址信息结构体大小
 
     char recvbuf[BUFSIZE];
     int len;
@@ -66,8 +67,8 @@ int main(void) {
         read_set = fd_set;
         retval = select(maxfd, &read_set, NULL, NULL, NULL);
 
-        if(retval == -1){
-            printf("select 错误:%s\n",strerror(errno));
+        if (retval == -1) {
+            printf("select 错误:%s\n", strerror(errno));
         }
 
         if (FD_ISSET(lfd, &read_set)) {
@@ -80,51 +81,17 @@ int main(void) {
             for (i = 0; i < FD_SET_SIZE; ++i) {
                 if (client[i] < 0) {
                     client[i] = cfd;
+                    FD_SET(cfd, &read_set);
                     printf("接收client[%d]一个请求来自于: %s:%d\n", i, inet_ntoa(clin_addr.sin_addr), ntohs(clin_addr.sin_port));
                     break;
                 }
             }
 
-            FD_SET(cfd, &read_set);
-
             maxfd = (cfd > maxfd) ? (cfd + 1) : maxfd;
             maxi = (i > maxi) ? ++i : maxi;
         }
-
         for (i = 0; i <= maxi; ++i) {
-            printf("i:%d",i); // 为什么这里也不输出呢？加上 return; 就能输出了
-//            if (FD_ISSET(client[i], &read_set)) {
-
-//                while(len = read(client[i],recvbuf,BUFSIZE)){
-//                    printf("22222");
-//                    write(STDOUT_FILENO,recvbuf,len);//把客户端输入的内容输出在终端
-//                    // 只有当客户端输入 stop 就停止当前客户端的连接
-//                    if (strncasecmp(recvbuf,"stop",4) == 0){
-//                        close(client[i]);
-//                        printf("clinet[%d] 连接关闭\n", i);
-//                        FD_CLR(client[i], &read_set);
-//                        client[i] = -1;
-//                        break;
-//                    }
-//                }
-
-//                if ((len = recv(scokfd, recvbuf, BUFSIZE, 0)) <= 0) {
-//                    close(scokfd);
-//                    printf("clinet[%d] 连接关闭\n", i);
-//                    FD_CLR(scokfd, &read_set);
-//                    client[i] = -1;
-//                }
-//                else {
-//                    write(STDOUT_FILENO,recvbuf,len);//把客户端输入的内容输出在终端
-//                    while(len = read(scokfd,recvbuf,BUFSIZE)){
-//                        write(STDOUT_FILENO,recvbuf,len);//把客户端输入的内容输出在终端
-//                    }
-//                }
-//
-//                if (--retval <= 0) {
-//                    break;
-//                }
-//            }
+            printf("i:%d", i); // 为什么这里也不输出呢？加上 return; 就能输出了
         }
     }
 
