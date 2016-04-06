@@ -24,7 +24,7 @@ int main(void) {
     char recvbuf[BUFSIZE];
     int len;
 
-    fd_set read_set, fd_set;
+    fd_set read_set, read_set_init;
 
     int client[FD_SET_SIZE];
     int i;
@@ -54,21 +54,18 @@ int main(void) {
         exit(1);
     }
 
-    maxfd = lfd + 1;
+    maxfd = lfd;
 
     for (i = 0; i < FD_SET_SIZE; ++i) {
         client[i] = -1;
     }
 
-//    FD_ZERO(&fd_set);
-//    FD_SET(lfd, &fd_set);
+    FD_ZERO(&read_set_init);
+    FD_SET(lfd, &read_set_init);
 
     while (1) {
 
-//        read_set = fd_set;
-
-        FD_ZERO(&read_set);
-        FD_SET(lfd, &read_set);
+        read_set = read_set_init;
 
         for (i = 0; i < FD_SET_SIZE; ++i) {
             if (client[i] > 0) {
@@ -76,8 +73,8 @@ int main(void) {
             }
         }
 
-        printf("select 等待中\n");
-        retval = select(maxfd, &read_set, NULL, NULL, NULL);
+        printf("select 等待\n");
+        retval = select(maxfd + 1, &read_set, NULL, NULL, NULL);//因为  read_set 是 select 的第二个参数（判断是否有数据可读），所以select会把有数据可读的fd放到 read_set中,所以 FD_ISSET(client[i], &read_set) 就是判断是否有数据可读
 
         if (retval == -1) {
             perror("select 错误\n");
@@ -86,7 +83,7 @@ int main(void) {
             continue;
         }
 
-        printf("select 返回完毕\n");
+        printf("select 返回\n");
 
         if (FD_ISSET(lfd, &read_set)) {
             clin_len = sizeof(clin_addr);
@@ -98,37 +95,29 @@ int main(void) {
             for (i = 0; i < FD_SET_SIZE; ++i) {
                 if (client[i] < 0) {
                     client[i] = cfd;
-                    FD_SET(cfd, &read_set);
                     printf("接收client[%d]一个请求来自于: %s:%d\n", i, inet_ntoa(clin_addr.sin_addr), ntohs(clin_addr.sin_port));
                     break;
                 }
             }
 
-            maxfd = (cfd > maxfd) ? (cfd + 1) : maxfd;
-            maxi = (i > maxi) ? ++i : maxi;
+            maxfd = (cfd > maxfd) ? cfd : maxfd;
+            maxi = (i >= maxi) ? ++i : maxi;
         }
 
-        for (i = 0; i <= maxi; ++i) {
+        for (i = 0; i < maxi; ++i) {
+            printf("i:%d\n",i);
             if (client[i] < 0) {
                 continue;
             }
 
             if (FD_ISSET(client[i], &read_set)) {
-
                 if ((len = read(client[i], recvbuf, BUFSIZE)) > 0) {
-                    //把客户端输入的内容输出在终端
                     write(STDOUT_FILENO, recvbuf, len);
-                    // 只有当客户端输入 stop 就停止当前客户端的连接
-                    if (strncasecmp(recvbuf, "stop", 4) == 0) {
-                        close(client[i]);
-                        printf("clinet[%d] 连接关闭\n", i);
-                        FD_CLR(client[i], &read_set);
-                        client[i] = -1;
-                        break;
-                    }
-                }
-
-                if (--retval <= 0) {
+                }else{
+                    close(client[i]);
+                    printf("clinet[%d] 连接关闭\n", i);
+                    FD_CLR(client[i], &read_set);
+                    client[i] = -1;
                     break;
                 }
             }
