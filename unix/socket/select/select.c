@@ -92,7 +92,7 @@ int main(void) {
         }
 
         for (i = 0; i <= maxi; ++i) {
-            printf("i:%d", i); // 为什么这里也不输出呢？加上 return; 就能输出了
+            printf("i:%d", i); 
         }
     }
 
