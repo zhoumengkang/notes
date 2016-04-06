@@ -64,8 +64,9 @@ int main(void) {
     FD_SET(lfd, &fd_set);
 
     while (1) {
+
         read_set = fd_set;
-        retval = select(maxfd, &read_set, NULL, NULL, NULL);
+        retval = select(maxfd, &read_set, NULL, NULL, 0);
 
         if (retval == -1) {
             printf("select 错误:%s\n", strerror(errno));
@@ -92,8 +93,31 @@ int main(void) {
         }
 
         for (i = 0; i <= maxi; ++i) {
-            printf("i:%d", i); 
+            if (client[i] < 0) {
+                continue;
+            }
+
+            if (FD_ISSET(client[i], &read_set)) {
+
+                while(len = read(client[i], recvbuf, BUFSIZE)){
+                    //把客户端输入的内容输出在终端
+                    write(STDOUT_FILENO, recvbuf, len);
+                    // 只有当客户端输入 stop 就停止当前客户端的连接
+                    if (strncasecmp(recvbuf, "stop", 4) == 0) {
+                        close(client[i]);
+                        printf("clinet[%d] 连接关闭\n", i);
+                        FD_CLR(client[i], &read_set);
+                        client[i] = -1;
+                        break;
+                    }
+                }
+
+                if (--retval <= 0) {
+                    break;
+                }
+            }
         }
+
     }
 
     close(lfd);
