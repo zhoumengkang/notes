@@ -66,10 +66,20 @@ int main(void) {
     while (1) {
 
         read_set = fd_set;
+
+        for (i = 0; i < FD_SET_SIZE; ++i) {
+            if (client[i] > 0) {
+                FD_SET(client[i], &read_set);
+            }
+        }
+
         retval = select(maxfd, &read_set, NULL, NULL, 0);
 
         if (retval == -1) {
-            printf("select 错误:%s\n", strerror(errno));
+            perror("select 错误\n");
+        } else if (retval == 0) {
+            printf("超时\n");
+            continue;
         }
 
         if (FD_ISSET(lfd, &read_set)) {
@@ -99,7 +109,7 @@ int main(void) {
 
             if (FD_ISSET(client[i], &read_set)) {
 
-                while(len = read(client[i], recvbuf, BUFSIZE)){
+                while (len = read(client[i], recvbuf, BUFSIZE)) {
                     //把客户端输入的内容输出在终端
                     write(STDOUT_FILENO, recvbuf, len);
                     // 只有当客户端输入 stop 就停止当前客户端的连接
