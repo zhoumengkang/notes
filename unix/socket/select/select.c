@@ -90,6 +90,7 @@ int main(void) {
             maxfd = (cfd > maxfd) ? (cfd + 1) : maxfd;
             maxi = (i > maxi) ? ++i : maxi;
         }
+
         for (i = 0; i <= maxi; ++i) {
             printf("i:%d", i); // 为什么这里也不输出呢？加上 return; 就能输出了
         }
