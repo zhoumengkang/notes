@@ -60,12 +60,15 @@ int main(void) {
         client[i] = -1;
     }
 
-    FD_ZERO(&fd_set);
-    FD_SET(lfd, &fd_set);
+//    FD_ZERO(&fd_set);
+//    FD_SET(lfd, &fd_set);
 
     while (1) {
 
-        read_set = fd_set;
+//        read_set = fd_set;
+
+        FD_ZERO(&read_set);
+        FD_SET(lfd, &read_set);
 
         for (i = 0; i < FD_SET_SIZE; ++i) {
             if (client[i] > 0) {
@@ -73,7 +76,8 @@ int main(void) {
             }
         }
 
-        retval = select(maxfd, &read_set, NULL, NULL, 0);
+        printf("select 等待中\n");
+        retval = select(maxfd, &read_set, NULL, NULL, NULL);
 
         if (retval == -1) {
             perror("select 错误\n");
@@ -81,6 +85,8 @@ int main(void) {
             printf("超时\n");
             continue;
         }
+
+        printf("select 返回完毕\n");
 
         if (FD_ISSET(lfd, &read_set)) {
             clin_len = sizeof(clin_addr);
@@ -109,7 +115,7 @@ int main(void) {
 
             if (FD_ISSET(client[i], &read_set)) {
 
-                while (len = read(client[i], recvbuf, BUFSIZE)) {
+                if ((len = read(client[i], recvbuf, BUFSIZE)) > 0) {
                     //把客户端输入的内容输出在终端
                     write(STDOUT_FILENO, recvbuf, len);
                     // 只有当客户端输入 stop 就停止当前客户端的连接
