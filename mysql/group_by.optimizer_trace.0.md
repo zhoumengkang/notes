@@ -188,17 +188,17 @@ mysql> select count(distinct aid) from article_rank where `day`>'20190115';
 如果临时表种没有对应的 aid就插入，如果已经存在的 aid，则把需要插入行的 pv 累加在原来的行上。
 
 ### 第三步
-根据`intermediate_tmp_table`里面的`num`字段做`desc`排序
+对`intermediate_tmp_table`里面的`num`字段做`desc`排序
 
 
-## filesort_summary.examined_rows
+#### filesort_summary.examined_rows
 
 排序扫描行数统计，我们统计下`group by`之后的总行数。（前面算过是649091）
 
 所以每个实验的结果中`filesort_summary.examined_rows` 的值都是`649091`。
 `filesort_summary.number_of_tmp_files`的值为0，表示没有使用临时文件来排序。
 
-## filesort_summary.sort_mode
+#### filesort_summary.sort_mode
 
 MySQL 会给每个线程分配一块内存用于排序，称为`sort_buffer`。`sort_buffer`的大小由`sort_buffer_size`来确定。
 
@@ -227,36 +227,25 @@ mysql> show global variables like 'sort_buffer_size';
 > https://juejin.im/entry/59019b428d6d810058b8488e
 
 
-
-### additional_fields
-
-
+##### additional_fields
 
 1. 初始化`sort_buffer`，确定放入字段，因为我们这里是根据`num`来排序，所以`sort_key`就是`num`，`additional_fields`就是`aid`；
 2. 把`group by` 子句之后生成的临时表（`intermediate_tmp_table`）里的数据（`aid`,`num`）存入`sort_buffer`。我们通过`number_of_tmp_files`值为0，知道内存是足够用的，并没有使用外部文件进行归并排序；
 3. 对`sort_buffer`中的数据按`num`做快速排序；
 4. 按照排序结果取前10行返回给客户端；
 
-
-### rowid
+##### rowid
 
 1. 根据索引或者全表扫描，按照过滤条件获得需要查询的排序字段值和row ID；
 2. 将要排序字段值和row ID组成键值对，存入sort buffer中；
-3. 如果sort buffer内存大于这些键值对的内存，就不需要创建临时文件了。否则，每次sort buffer填满以后，需要直接用qsort(快速排序算法)在内存中排好序，并写到临时文件中；
+3. 如果sort buffer内存大于这些键值对的内存，就不需要创建临时文件了。否则，每次sort buffer填满以后，需要在内存中排好序（快排），并写到临时文件中；
 4. 重复上述步骤，直到所有的行数据都正常读取了完成；
 5. 用到了临时文件的，需要利用磁盘外部排序，将row id写入到结果文件中；
 6. 根据结果文件中的row ID按序读取用户需要返回的数据。由于row ID不是顺序的，导致回表时是随机IO，为了进一步优化性能（变成顺序IO），MySQL会读一批row ID，并将读到的数据按排序字段顺序插入缓存区中(内存大小read_rnd_buffer_size)。
 
- 
-
-## filesort_priority_queue_optimization
+##### filesort_priority_queue_optimization
 
 优先队列排序算法
-
-
-## converting_tmp_table_to_ondisk
-
-
 
 ## Innodb_rows_read
 
@@ -280,6 +269,7 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 +----------+
 ```
 
+## 对比分析
 
 ### 实验1
 因为满足条件的总行数是`3208513`，因为使用的是`idx_day_aid_pv`索引，而查询的值是`aid`和`pv`，所以是覆盖索引，不需要进行回表。
@@ -289,11 +279,13 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 相比实验1，实验2中不仅需要对临时表存盘，同时因为索引是`idx_day`，不能使用覆盖索引，还需要每行都回表，所以最后结果是 `3208513*3 + 1 = 9625540`；
 ### 实验3
 实验3中因为最左列是`aid`，无法对`day>20190115`表达式进行过滤筛选，所以需要遍历整个索引（覆盖所有行的数据）。
-但是本次过程中创建的临时表没有写入磁盘，都是在内存种操作，所以最后结果是`14146055 + 1 = 14146056`；
+但是本次过程中创建的临时表（memory 引擎）没有写入磁盘，都是在内存中操作，所以最后结果是`14146055 + 1 = 14146056`；
 耗时也是最短的。
+
+> 同样是写入 649091 到内存临时表，为什么其他三种方式都会出现内存不够用的情况呢？莫非其他三种情况是先把所有的行写入到临时表，再遍历合并？
+
 ### 实验4
 实验4首先遍历主表，需要扫描`14146055`行，然后把符合条件的`3208513`行放入临时表 ，所以最后是`14146055 + 3208513 + 1 = 17354569`。
-
 
 # 附录
 
