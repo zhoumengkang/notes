@@ -64,20 +64,7 @@ select VARIABLE_VALUE into @b from performance_schema.session_status where varia
 
 > 实验结果详情见文章最后附录章节
 
-# 实验结果分析
-
-在看了附录中的实验结果之后，我汇总了一些比较重要的数据对比信息
-
-
-指标   | index | query_time | filesort_summary.examined_rows | filesort_summary.sort_mode | filesort_priority_queue_optimization.rows_estimate | converting_tmp_table_to_ondisk | Innodb_rows_read  
-------- | ------- | ------- | ------- | ------- | ------- | -------  | ------- 
-实验1  |idx_day_aid_pv    | 25.05 | 649091 | additional_fields | 1057   | true  | 6417027  
-实验2  |idx_day           | 42.06 | 649091 | additional_fields | 1057   | true  | 9625540  
-实验3  |idx_aid_day_pv    | 5.38  | 649091 | rowid             | 649101 | false | 14146056 
-实验4  |PRI               | 21.90 | 649091 | rowid             | 1057   | true  | 17354569 
-
-## 实验1的执行为例
-
+## 实验1的原理详解
 
 ```json
 {
@@ -246,6 +233,41 @@ mysql> show global variables like 'sort_buffer_size';
 ##### filesort_priority_queue_optimization
 
 优先队列排序算法
+
+
+# 实验结果分析
+
+在看了附录中的实验结果之后，我汇总了一些比较重要的数据对比信息
+
+
+指标   | index | query_time | filesort_summary.examined_rows | filesort_summary.sort_mode | filesort_priority_queue_optimization.rows_estimate | converting_tmp_table_to_ondisk | Innodb_rows_read  
+------- | ------- | ------- | ------- | ------- | ------- | -------  | ------- 
+实验1  |idx_day_aid_pv    | 25.05 | 649091 | additional_fields | 1057   | true  | 6417027  
+实验2  |idx_day           | 42.06 | 649091 | additional_fields | 1057   | true  | 9625540  
+实验3  |idx_aid_day_pv    | 5.38  | 649091 | rowid             | 649101 | false | 14146056 
+实验4  |PRI               | 21.90 | 649091 | rowid             | 1057   | true  | 17354569 
+
+## filesort_summary.examined_rows
+
+实验1案例中已经分析过。
+```sql
+mysql> select count(distinct aid) from article_rank where `day`>'20190115';
++---------------------+
+| count(distinct aid) |
++---------------------+
+|              649091 |
++---------------------+
+```
+
+## filesort_summary.sort_mode
+
+同样的字段，同样的行数，为什么有的是`additional_fields`排序，有的是`rowid`排序
+
+## filesort_priority_queue_optimization.rows_estimate
+
+## converting_tmp_table_to_ondisk
+
+是否创建临时表
 
 ## Innodb_rows_read
 
