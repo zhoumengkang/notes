@@ -181,6 +181,12 @@ mysql> select count(distinct aid) from article_rank where `day`>'20190115';
 ```
 > 问题：为什么会触发`memory_table_size_exceeded`呢？
 
+数据写入临时表的过程如下：
+
+在磁盘上创建临时表，表里有两个字段，`aid`和`num`，因为是 `group by aid`，所以`aid`是临时表的主键。
+实验1中是扫描索引`idx_day_aid_pv`，依次取出叶子节点的`aid`和`pv`的值。
+如果临时表种没有对应的 aid就插入，如果已经存在的 aid，则把需要插入行的 pv 累加在原来的行上。
+
 ### 第三步
 根据`intermediate_tmp_table`里面的`num`字段做`desc`排序
 
