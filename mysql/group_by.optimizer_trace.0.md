@@ -269,8 +269,6 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 +----------+
 ```
 
-## 对比分析
-
 ### 实验1
 因为满足条件的总行数是`3208513`，因为使用的是`idx_day_aid_pv`索引，而查询的值是`aid`和`pv`，所以是覆盖索引，不需要进行回表。
 但是可以看到在创建临时表（`creating_tmp_table`）之后，因为超过临时表内存限制（`memory_table_size_exceeded`），所以这`3208513`行数据的临时表会写入磁盘，使用的依然是`InnoDB`引擎。
