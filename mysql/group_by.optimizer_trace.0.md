@@ -253,7 +253,7 @@ mysql> show global variables like 'sort_buffer_size';
 实验1  |idx_day_aid_pv    | 25.05 | 649091 | additional_fields | 1057   | true  | 6417027  
 实验2  |idx_day           | 42.06 | 649091 | additional_fields | 1057   | true  | 9625540  
 实验3  |idx_aid_day_pv    | 5.38  | 649091 | rowid             | 649101 | false | 14146056 
-实验4  |PRI               | 21.90 | 649091 | rowid             | 1057   | true  | 17354569 
+实验4  |PRI               | 21.90 | 649091 | additional_fields | 1057   | true  | 17354569 
 
 ## filesort_summary.examined_rows
 
@@ -309,6 +309,10 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 实验3中因为最左列是`aid`，无法对`day>20190115`表达式进行过滤筛选，所以需要遍历整个索引（覆盖所有行的数据）。
 但是本次过程中创建的临时表（memory 引擎）没有写入磁盘，都是在内存中操作，所以最后结果是`14146055 + 1 = 14146056`；
 耗时也是最短的。
+
+> 为什么实验3使用的是 rowid 排序而不是 additional_fields 排序？
+
+我们说 additional_fields 对比 rowid 来说，减少了回表，也就减少了磁盘访问，会被优先选择。但是要注意这是对于 InnoDB 来说的。而实验3是内存表，使用的是 memory 引擎。回表过程只是根据数据行的位置，直接访问内存得到数据，不会有磁盘访问。排序的列越少越好占的内存就越小，所以就选择了 rowid 排序。
 
 > 同样是写入 649091 到内存临时表，为什么其他三种方式都会出现内存不够用的情况呢？莫非其他三种情况是先把所有的行写入到临时表，再遍历合并？
 
