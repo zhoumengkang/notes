@@ -327,251 +327,16 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 mysql> select `aid`,sum(`pv`) as num from article_rank force index(idx_day_aid_pv) where `day`>'20190115' group by aid order by num desc LIMIT 10;
 # 结果省略
 10 rows in set (25.05 sec)
+```
 
-mysql> SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G;
-*************************** 1. row ***************************
-                            QUERY: select `aid`,sum(`pv`) as num from article_rank force index(idx_day_aid_pv) where `day`>'20190115' group by aid order by num desc LIMIT 10
-                            TRACE: {
+```json
+{
   "steps": [
     {
-      "join_preparation": {
-        "select#": 1,
-        "steps": [
-          {
-            "expanded_query": "/* select#1 */ select `article_rank`.`aid` AS `aid`,sum(`article_rank`.`pv`) AS `num` from `article_rank` FORCE INDEX (`idx_day_aid_pv`) where (`article_rank`.`day` > '20190115') group by `article_rank`.`aid` order by `num` desc limit 10"
-          }
-        ]
-      }
+      "join_preparation": "略"
     },
     {
-      "join_optimization": {
-        "select#": 1,
-        "steps": [
-          {
-            "condition_processing": {
-              "condition": "WHERE",
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "steps": [
-                {
-                  "transformation": "equality_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "constant_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "substitute_generated_columns": {
-            }
-          },
-          {
-            "table_dependencies": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)",
-                "row_may_be_null": false,
-                "map_bit": 0,
-                "depends_on_map_bits": [
-                ]
-              }
-            ]
-          },
-          {
-            "ref_optimizer_key_uses": [
-            ]
-          },
-          {
-            "rows_estimation": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)",
-                "const_keys_added": {
-                  "keys": [
-                    "idx_aid_day_pv"
-                  ],
-                  "cause": "group_by"
-                },
-                "range_analysis": {
-                  "table_scan": {
-                    "rows": 13748457,
-                    "cost": 2e308
-                  },
-                  "potential_range_indexes": [
-                    {
-                      "index": "PRIMARY",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_day",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_day_aid_pv",
-                      "usable": true,
-                      "key_parts": [
-                        "day",
-                        "aid",
-                        "pv",
-                        "id"
-                      ]
-                    },
-                    {
-                      "index": "idx_aid_day_pv",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    }
-                  ],
-                  "best_covering_index_scan": {
-                    "index": "idx_day_aid_pv",
-                    "cost": 2.78e6,
-                    "chosen": true
-                  },
-                  "setup_range_conditions": [
-                  ],
-                  "group_index_range": {
-                    "chosen": false,
-                    "cause": "not_applicable_aggregate_function"
-                  },
-                  "analyzing_range_alternatives": {
-                    "range_scan_alternatives": [
-                      {
-                        "index": "idx_day_aid_pv",
-                        "ranges": [
-                          "20190115 < day"
-                        ],
-                        "index_dives_for_eq_ranges": true,
-                        "rowid_ordered": false,
-                        "using_mrr": false,
-                        "index_only": true,
-                        "rows": 6874228,
-                        "cost": 1.39e6,
-                        "chosen": true
-                      }
-                    ],
-                    "analyzing_roworder_intersect": {
-                      "usable": false,
-                      "cause": "too_few_roworder_scans"
-                    }
-                  },
-                  "chosen_range_access_summary": {
-                    "range_access_plan": {
-                      "type": "range_scan",
-                      "index": "idx_day_aid_pv",
-                      "rows": 6874228,
-                      "ranges": [
-                        "20190115 < day"
-                      ]
-                    },
-                    "rows_for_plan": 6874228,
-                    "cost_for_plan": 1.39e6,
-                    "chosen": true
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "considered_execution_plans": [
-              {
-                "plan_prefix": [
-                ],
-                "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)",
-                "best_access_path": {
-                  "considered_access_paths": [
-                    {
-                      "rows_to_scan": 6874228,
-                      "access_type": "range",
-                      "range_details": {
-                        "used_index": "idx_day_aid_pv"
-                      },
-                      "resulting_rows": 6.87e6,
-                      "cost": 2.76e6,
-                      "chosen": true
-                    }
-                  ]
-                },
-                "condition_filtering_pct": 100,
-                "rows_for_plan": 6.87e6,
-                "cost_for_plan": 2.76e6,
-                "chosen": true
-              }
-            ]
-          },
-          {
-            "attaching_conditions_to_tables": {
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "attached_conditions_computation": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)",
-                  "rechecking_index_usage": {
-                    "recheck_reason": "low_limit",
-                    "limit": 10,
-                    "row_estimate": 6.87e6
-                  }
-                }
-              ],
-              "attached_conditions_summary": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)",
-                  "attached": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "ORDER BY",
-              "original_clause": "`num` desc",
-              "items": [
-                {
-                  "item": "sum(`article_rank`.`pv`)"
-                }
-              ],
-              "resulting_clause_is_simple": false,
-              "resulting_clause": "`num` desc"
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "GROUP BY",
-              "original_clause": "`article_rank`.`aid`",
-              "items": [
-                {
-                  "item": "`article_rank`.`aid`"
-                }
-              ],
-              "resulting_clause_is_simple": true,
-              "resulting_clause": "`article_rank`.`aid`"
-            }
-          },
-          {
-            "reconsidering_access_paths_for_index_ordering": {
-              "clause": "GROUP BY",
-              "index_order_summary": {
-                "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)",
-                "index_provides_order": false,
-                "order_direction": "undefined",
-                "index": "idx_day_aid_pv",
-                "plan_changed": false
-              }
-            }
-          },
-          {
-            "refine_plan": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_day_aid_pv`)"
-              }
-            ]
-          }
-        ]
-      }
+      "join_optimization": "略"
     },
     {
       "join_execution": {
@@ -632,13 +397,8 @@ mysql> SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G;
     }
   ]
 }
-MISSING_BYTES_BEYOND_MAX_MEM_SIZE: 0
-          INSUFFICIENT_PRIVILEGES: 0
-1 row in set (0.00 sec)
-
-ERROR:
-No query specified
-
+```
+```sql
 mysql> select VARIABLE_VALUE into @b from performance_schema.session_status where variable_name = 'Innodb_rows_read';
 Query OK, 1 row affected (0.00 sec)
 
@@ -657,235 +417,15 @@ mysql> select @b-@a;
 mysql> select `aid`,sum(`pv`) as num from article_rank force index(idx_day) where `day`>'20190115' group by aid order by num desc LIMIT 10;
 # 结果省略
 10 rows in set (42.06 sec)
-
-mysql> select * from `information_schema`.`optimizer_trace`\G;
-*************************** 1. row ***************************
-                            QUERY: select `aid`,sum(`pv`) as num from article_rank force index(idx_day) where `day`>'20190115' group by aid order by num desc LIMIT 10
-                            TRACE: {
+```
+```json
+{
   "steps": [
     {
-      "join_preparation": {
-        "select#": 1,
-        "steps": [
-          {
-            "expanded_query": "/* select#1 */ select `article_rank`.`aid` AS `aid`,sum(`article_rank`.`pv`) AS `num` from `article_rank` FORCE INDEX (`idx_day`) where (`article_rank`.`day` > '20190115') group by `article_rank`.`aid` order by `num` desc limit 10"
-          }
-        ]
-      }
+      "join_preparation": "略"
     },
     {
-      "join_optimization": {
-        "select#": 1,
-        "steps": [
-          {
-            "condition_processing": {
-              "condition": "WHERE",
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "steps": [
-                {
-                  "transformation": "equality_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "constant_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "substitute_generated_columns": {
-            }
-          },
-          {
-            "table_dependencies": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_day`)",
-                "row_may_be_null": false,
-                "map_bit": 0,
-                "depends_on_map_bits": [
-                ]
-              }
-            ]
-          },
-          {
-            "ref_optimizer_key_uses": [
-            ]
-          },
-          {
-            "rows_estimation": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_day`)",
-                "const_keys_added": {
-                  "keys": [
-                    "idx_day_aid_pv",
-                    "idx_aid_day_pv"
-                  ],
-                  "cause": "group_by"
-                },
-                "range_analysis": {
-                  "table_scan": {
-                    "rows": 13748457,
-                    "cost": 2e308
-                  },
-                  "potential_range_indexes": [
-                    {
-                      "index": "PRIMARY",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_day",
-                      "usable": true,
-                      "key_parts": [
-                        "day",
-                        "id"
-                      ]
-                    },
-                    {
-                      "index": "idx_day_aid_pv",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_aid_day_pv",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    }
-                  ],
-                  "setup_range_conditions": [
-                  ],
-                  "group_index_range": {
-                    "chosen": false,
-                    "cause": "not_applicable_aggregate_function"
-                  },
-                  "analyzing_range_alternatives": {
-                    "range_scan_alternatives": [
-                      {
-                        "index": "idx_day",
-                        "ranges": [
-                          "20190115 < day"
-                        ],
-                        "index_dives_for_eq_ranges": true,
-                        "rowid_ordered": false,
-                        "using_mrr": true,
-                        "index_only": false,
-                        "rows": 6473580,
-                        "cost": 6.91e6,
-                        "chosen": true
-                      }
-                    ],
-                    "analyzing_roworder_intersect": {
-                      "usable": false,
-                      "cause": "too_few_roworder_scans"
-                    }
-                  },
-                  "chosen_range_access_summary": {
-                    "range_access_plan": {
-                      "type": "range_scan",
-                      "index": "idx_day",
-                      "rows": 6473580,
-                      "ranges": [
-                        "20190115 < day"
-                      ]
-                    },
-                    "rows_for_plan": 6473580,
-                    "cost_for_plan": 6.91e6,
-                    "chosen": true
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "considered_execution_plans": [
-              {
-                "plan_prefix": [
-                ],
-                "table": "`article_rank` FORCE INDEX (`idx_day`)",
-                "best_access_path": {
-                  "considered_access_paths": [
-                    {
-                      "rows_to_scan": 6473580,
-                      "access_type": "range",
-                      "range_details": {
-                        "used_index": "idx_day"
-                      },
-                      "resulting_rows": 6.47e6,
-                      "cost": 8.21e6,
-                      "chosen": true
-                    }
-                  ]
-                },
-                "condition_filtering_pct": 100,
-                "rows_for_plan": 6.47e6,
-                "cost_for_plan": 8.21e6,
-                "chosen": true
-              }
-            ]
-          },
-          {
-            "attaching_conditions_to_tables": {
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "attached_conditions_computation": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`idx_day`)",
-                  "rechecking_index_usage": {
-                    "recheck_reason": "low_limit",
-                    "limit": 10,
-                    "row_estimate": 6.47e6
-                  }
-                }
-              ],
-              "attached_conditions_summary": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`idx_day`)",
-                  "attached": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "ORDER BY",
-              "original_clause": "`num` desc",
-              "items": [
-                {
-                  "item": "sum(`article_rank`.`pv`)"
-                }
-              ],
-              "resulting_clause_is_simple": false,
-              "resulting_clause": "`num` desc"
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "GROUP BY",
-              "original_clause": "`article_rank`.`aid`",
-              "items": [
-                {
-                  "item": "`article_rank`.`aid`"
-                }
-              ],
-              "resulting_clause_is_simple": true,
-              "resulting_clause": "`article_rank`.`aid`"
-            }
-          },
-          {
-            "refine_plan": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_day`)",
-                "pushed_index_condition": "(`article_rank`.`day` > '20190115')",
-                "table_condition_attached": null
-              }
-            ]
-          }
-        ]
-      }
+      "join_optimization": "略"
     },
     {
       "join_execution": {
@@ -946,13 +486,8 @@ mysql> select * from `information_schema`.`optimizer_trace`\G;
     }
   ]
 }
-MISSING_BYTES_BEYOND_MAX_MEM_SIZE: 0
-          INSUFFICIENT_PRIVILEGES: 0
-1 row in set (0.00 sec)
-
-mysql> select VARIABLE_VALUE into @b from performance_schema.session_status where variable_name = 'Innodb_rows_read';
-Query OK, 1 row affected (0.00 sec)
-
+```
+```sql
 mysql> select @b-@a;
 +---------+
 | @b-@a   |
@@ -968,228 +503,15 @@ mysql> select @b-@a;
 mysql> select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) where `day`>'20190115' group by aid order by num desc LIMIT 10;
 # 省略结果
 10 rows in set (5.38 sec)
-
-mysql> SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G;
-*************************** 1. row ***************************
-                            QUERY: select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) where `day`>'20190115' group by aid order by num desc LIMIT 10
-                            TRACE: {
+```
+```json
+{
   "steps": [
     {
-      "join_preparation": {
-        "select#": 1,
-        "steps": [
-          {
-            "expanded_query": "/* select#1 */ select `article_rank`.`aid` AS `aid`,sum(`article_rank`.`pv`) AS `num` from `article_rank` FORCE INDEX (`idx_aid_day_pv`) where (`article_rank`.`day` > '20190115') group by `article_rank`.`aid` order by `num` desc limit 10"
-          }
-        ]
-      }
+      "join_preparation": "略"
     },
     {
-      "join_optimization": {
-        "select#": 1,
-        "steps": [
-          {
-            "condition_processing": {
-              "condition": "WHERE",
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "steps": [
-                {
-                  "transformation": "equality_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "constant_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "substitute_generated_columns": {
-            }
-          },
-          {
-            "table_dependencies": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)",
-                "row_may_be_null": false,
-                "map_bit": 0,
-                "depends_on_map_bits": [
-                ]
-              }
-            ]
-          },
-          {
-            "ref_optimizer_key_uses": [
-            ]
-          },
-          {
-            "rows_estimation": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)",
-                "const_keys_added": {
-                  "keys": [
-                    "idx_day_aid_pv",
-                    "idx_aid_day_pv"
-                  ],
-                  "cause": "group_by"
-                },
-                "range_analysis": {
-                  "table_scan": {
-                    "rows": 13748457,
-                    "cost": 2e308
-                  },
-                  "potential_range_indexes": [
-                    {
-                      "index": "PRIMARY",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_day",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_day_aid_pv",
-                      "usable": false,
-                      "cause": "not_applicable"
-                    },
-                    {
-                      "index": "idx_aid_day_pv",
-                      "usable": true,
-                      "key_parts": [
-                        "aid",
-                        "day",
-                        "pv",
-                        "id"
-                      ]
-                    }
-                  ],
-                  "best_covering_index_scan": {
-                    "index": "idx_aid_day_pv",
-                    "cost": 2.78e6,
-                    "chosen": true
-                  },
-                  "setup_range_conditions": [
-                  ],
-                  "group_index_range": {
-                    "chosen": false,
-                    "cause": "not_applicable_aggregate_function"
-                  },
-                  "analyzing_range_alternatives": {
-                    "range_scan_alternatives": [
-                      {
-                        "index": "idx_aid_day_pv",
-                        "chosen": false,
-                        "cause": "unknown"
-                      }
-                    ],
-                    "analyzing_roworder_intersect": {
-                      "usable": false,
-                      "cause": "too_few_roworder_scans"
-                    }
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "considered_execution_plans": [
-              {
-                "plan_prefix": [
-                ],
-                "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)",
-                "best_access_path": {
-                  "considered_access_paths": [
-                    {
-                      "rows_to_scan": 13748457,
-                      "access_type": "scan",
-                      "resulting_rows": 4.58e6,
-                      "cost": 1.65e7,
-                      "chosen": true
-                    }
-                  ]
-                },
-                "condition_filtering_pct": 100,
-                "rows_for_plan": 4.58e6,
-                "cost_for_plan": 1.65e7,
-                "chosen": true
-              }
-            ]
-          },
-          {
-            "attaching_conditions_to_tables": {
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "attached_conditions_computation": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)",
-                  "rechecking_index_usage": {
-                    "recheck_reason": "low_limit",
-                    "limit": 10,
-                    "row_estimate": 4.58e6
-                  }
-                }
-              ],
-              "attached_conditions_summary": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)",
-                  "attached": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "ORDER BY",
-              "original_clause": "`num` desc",
-              "items": [
-                {
-                  "item": "sum(`article_rank`.`pv`)"
-                }
-              ],
-              "resulting_clause_is_simple": false,
-              "resulting_clause": "`num` desc"
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "GROUP BY",
-              "original_clause": "`article_rank`.`aid`",
-              "items": [
-                {
-                  "item": "`article_rank`.`aid`"
-                }
-              ],
-              "resulting_clause_is_simple": true,
-              "resulting_clause": "`article_rank`.`aid`"
-            }
-          },
-          {
-            "reconsidering_access_paths_for_index_ordering": {
-              "clause": "GROUP BY",
-              "index_order_summary": {
-                "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)",
-                "index_provides_order": true,
-                "order_direction": "asc",
-                "index": "idx_aid_day_pv",
-                "plan_changed": false
-              }
-            }
-          },
-          {
-            "refine_plan": [
-              {
-                "table": "`article_rank` FORCE INDEX (`idx_aid_day_pv`)"
-              }
-            ]
-          }
-        ]
-      }
+      "join_optimization": "略"
     },
     {
       "join_execution": {
@@ -1237,13 +559,8 @@ mysql> SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G;
     }
   ]
 }
-MISSING_BYTES_BEYOND_MAX_MEM_SIZE: 0
-          INSUFFICIENT_PRIVILEGES: 0
-1 row in set (0.00 sec)
-
-ERROR:
-No query specified
-
+```
+```sql
 mysql> select VARIABLE_VALUE into @b from performance_schema.session_status where variable_name = 'Innodb_rows_read';
 Query OK, 1 row affected (0.00 sec)
 
@@ -1258,167 +575,17 @@ mysql> select @b-@a;
 
 ## 实验4
 ```sql
-mysql> select `aid`,sum(`pv`) as num from article_rank force index(PRI) where `day`>'20190115' group by aid order by num desc LIMIT 10;
-# 省略查询结果
+mysql> select `aid`,sum(`pv`) as num from article_rank force index(PRI) where `day`>'20190115' group by aid order by num desc LIMIT 10;# 省略查询结果
 10 rows in set (21.90 sec)
-mysql> SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G;
-*************************** 1. row ***************************
-                            QUERY: select `aid`,sum(`pv`) as num from article_rank force index(PRI) where `day`>'20190115' group by aid order by num desc LIMIT 10
-                            TRACE: {
+```
+```json
+{
   "steps": [
     {
-      "join_preparation": {
-        "select#": 1,
-        "steps": [
-          {
-            "expanded_query": "/* select#1 */ select `article_rank`.`aid` AS `aid`,sum(`article_rank`.`pv`) AS `num` from `article_rank` FORCE INDEX (`PRI`) where (`article_rank`.`day` > '20190115') group by `article_rank`.`aid` order by `num` desc limit 10"
-          }
-        ]
-      }
+      "join_preparation": "略"
     },
     {
-      "join_optimization": {
-        "select#": 1,
-        "steps": [
-          {
-            "condition_processing": {
-              "condition": "WHERE",
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "steps": [
-                {
-                  "transformation": "equality_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "constant_propagation",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                },
-                {
-                  "transformation": "trivial_condition_removal",
-                  "resulting_condition": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "substitute_generated_columns": {
-            }
-          },
-          {
-            "table_dependencies": [
-              {
-                "table": "`article_rank` FORCE INDEX (`PRI`)",
-                "row_may_be_null": false,
-                "map_bit": 0,
-                "depends_on_map_bits": [
-                ]
-              }
-            ]
-          },
-          {
-            "ref_optimizer_key_uses": [
-            ]
-          },
-          {
-            "rows_estimation": [
-              {
-                "table": "`article_rank` FORCE INDEX (`PRI`)",
-                "const_keys_added": {
-                  "keys": [
-                    "idx_day_aid_pv",
-                    "idx_aid_day_pv"
-                  ],
-                  "cause": "group_by"
-                },
-                "range_analysis": {
-                  "table_scan": {
-                    "rows": 13748457,
-                    "cost": 2e308
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "considered_execution_plans": [
-              {
-                "plan_prefix": [
-                ],
-                "table": "`article_rank` FORCE INDEX (`PRI`)",
-                "best_access_path": {
-                  "considered_access_paths": [
-                    {
-                      "rows_to_scan": 13748457,
-                      "access_type": "scan",
-                      "resulting_rows": 4.58e6,
-                      "cost": 1.65e7,
-                      "chosen": true
-                    }
-                  ]
-                },
-                "condition_filtering_pct": 100,
-                "rows_for_plan": 4.58e6,
-                "cost_for_plan": 1.65e7,
-                "chosen": true
-              }
-            ]
-          },
-          {
-            "attaching_conditions_to_tables": {
-              "original_condition": "(`article_rank`.`day` > '20190115')",
-              "attached_conditions_computation": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`PRI`)",
-                  "rechecking_index_usage": {
-                    "recheck_reason": "low_limit",
-                    "limit": 10,
-                    "row_estimate": 4.58e6
-                  }
-                }
-              ],
-              "attached_conditions_summary": [
-                {
-                  "table": "`article_rank` FORCE INDEX (`PRI`)",
-                  "attached": "(`article_rank`.`day` > '20190115')"
-                }
-              ]
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "ORDER BY",
-              "original_clause": "`num` desc",
-              "items": [
-                {
-                  "item": "sum(`article_rank`.`pv`)"
-                }
-              ],
-              "resulting_clause_is_simple": false,
-              "resulting_clause": "`num` desc"
-            }
-          },
-          {
-            "clause_processing": {
-              "clause": "GROUP BY",
-              "original_clause": "`article_rank`.`aid`",
-              "items": [
-                {
-                  "item": "`article_rank`.`aid`"
-                }
-              ],
-              "resulting_clause_is_simple": true,
-              "resulting_clause": "`article_rank`.`aid`"
-            }
-          },
-          {
-            "refine_plan": [
-              {
-                "table": "`article_rank` FORCE INDEX (`PRI`)"
-              }
-            ]
-          }
-        ]
-      }
+      "join_optimization": "略"
     },
     {
       "join_execution": {
@@ -1479,13 +646,8 @@ mysql> SELECT * FROM `information_schema`.`OPTIMIZER_TRACE`\G;
     }
   ]
 }
-MISSING_BYTES_BEYOND_MAX_MEM_SIZE: 0
-          INSUFFICIENT_PRIVILEGES: 0
-1 row in set (0.00 sec)
-
-ERROR:
-No query specified
-
+```
+```sql
 mysql> select VARIABLE_VALUE into @b from performance_schema.session_status where variable_name = 'Innodb_rows_read';
 Query OK, 1 row affected (0.00 sec)
 
