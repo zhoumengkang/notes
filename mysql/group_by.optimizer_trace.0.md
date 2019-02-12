@@ -6,10 +6,7 @@ Mysql 版本 ：5.7
 
 
 ```sql
-mysql> show create table article_rank\G;
-*************************** 1. row ***************************
-       Table: article_rank
-Create Table: CREATE TABLE `article_rank` (
+CREATE TABLE `article_rank` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `aid` int(11) unsigned NOT NULL,
   `pv` int(11) unsigned NOT NULL DEFAULT '1',
@@ -18,8 +15,7 @@ Create Table: CREATE TABLE `article_rank` (
   KEY `idx_day` (`day`),
   KEY `idx_day_aid_pv` (`day`,`aid`,`pv`),
   KEY `idx_aid_day_pv` (`aid`,`day`,`pv`)
-) ENGINE=InnoDB AUTO_INCREMENT=240776593 DEFAULT CHARSET=utf8
-1 row in set (0.00 sec)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8
 ```
 # 实验原理
 
@@ -28,7 +24,7 @@ Create Table: CREATE TABLE `article_rank` (
 利用`performance_schema`库里面的`session_status`来统计`innodb`读取行数
 利用`performance_schema`库里面的`optimizer_trace`来查看语句执行的详细信息
 
-下面的实验都使用下面的套路来执行
+下面的实验都使用如下步骤来执行
 
 ```sql
 #0. 如果前面有开启 optimizer_trace 则先关闭
@@ -150,6 +146,16 @@ mysql> show global variables like '%table_size';
 | tmp_table_size      | 16777216 |
 +---------------------+----------+
 ```
+
+> https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_max_heap_table_size
+> https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_tmp_table_size
+
+> tmp_table_size 
+> The maximum size of internal in-memory temporary tables. This variable does not apply to user-created MEMORY tables.
+> 
+> The actual limit is determined from whichever of the values of tmp_table_size and max_heap_table_size is smaller. If an in-memory temporary table exceeds the limit, MySQL automatically converts it to an on-disk temporary table. The internal_tmp_disk_storage_engine option defines the storage engine used for on-disk temporary tables.
+
+
 也就是说这里临时表的限制是`16M`，而一行需要占的空间是20字节，那么最多只能容纳`floor(16777216/20) = 838860`行，所以`row_limit_estimate`是`838860`。
 
 我们统计下`group by`之后的总行数。
