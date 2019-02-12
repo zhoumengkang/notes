@@ -217,11 +217,6 @@ mysql> show global variables like 'sort_buffer_size';
 - <sort_key, additional_fields>
 - <sort_key, packed_additional_fields>
 
-> 可以参考丁奇老师的《“order by”是怎么工作的》
-> https://time.geekbang.org/column/article/73479
-> https://juejin.im/entry/59019b428d6d810058b8488e
-
-
 ##### additional_fields
 
 1. 初始化`sort_buffer`，确定放入字段，因为我们这里是根据`num`来排序，所以`sort_key`就是`num`，`additional_fields`就是`aid`；
@@ -662,9 +657,9 @@ mysql> select @b-@a;
 
 
 
-
 ---
 > 参考《MySQL实战45讲》
-> https://time.geekbang.org/column/article/73479
-> https://time.geekbang.org/column/article/73795
+> [https://time.geekbang.org/column/article/73479](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)
+> [https://time.geekbang.org/column/article/73795](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)
 > https://dev.mysql.com/doc/refman/5.7/en/order-by-optimization.html
+> https://juejin.im/entry/59019b428d6d810058b8488e
