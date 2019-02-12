@@ -397,15 +397,6 @@ mysql> select @b-@a;
 1 row in set (0.00 sec)
 ```
 
-
-
----
-> 参考《MySQL实战45讲》
-> [https://time.geekbang.org/column/article/73479](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)
-> [https://time.geekbang.org/column/article/73795](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)
-> https://dev.mysql.com/doc/refman/5.7/en/order-by-optimization.html
-> https://juejin.im/entry/59019b428d6d810058b8488e
-
 ## 实验1的原理详解
 
 看下本案例中的 sql 去掉强制索引之后的语句
@@ -598,3 +589,12 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 
 ### 实验4
 实验4首先遍历主表，需要扫描`14146055`行，然后把符合条件的`3208513`行放入临时表 ，所以最后是`14146055 + 3208513 + 1 = 17354569`。
+
+
+# 参考
+
+> 《[MySQL实战45讲](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)》
+> [https://time.geekbang.org/column/article/73479](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)
+> [https://time.geekbang.org/column/article/73795](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)
+> https://dev.mysql.com/doc/refman/5.7/en/order-by-optimization.html
+> https://juejin.im/entry/59019b428d6d810058b8488e
