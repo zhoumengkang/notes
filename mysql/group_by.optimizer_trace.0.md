@@ -1,3 +1,5 @@
+> 该博客是我在看了《[MySQL实战45讲](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)》之后的一次实践笔记。文章比较枯燥，如果你在这篇文章看到一些陌生的关键字，建议你也一定要去做实验，只有做实验且验证了各个数据的由来，才能真正弄懂。
+
 # 背景
 
 Mysql 版本 ：5.7
@@ -397,12 +399,14 @@ mysql> select @b-@a;
 1 row in set (0.00 sec)
 ```
 
-## 实验1的原理详解
+## 执行流程举例说明
 
 看下本案例中的 sql 去掉强制索引之后的语句
 ```sql
 select `aid`,sum(`pv`) as num from article_rank where `day`>20190115 group by aid order by num desc LIMIT 10;
 ```
+我们以实验1为例
+
 ### 第一步
 因为该 sql 中使用了 `group by`，所以我们看到`optimizer_trace`在执行时（`join_execution`）都会先创建一张临时表`creating_tmp_table`）来存放`group by`子句之后的结果。
 
@@ -413,6 +417,7 @@ select `aid`,sum(`pv`) as num from article_rank where `day`>20190115 group by ai
 
 ### 第二步
 因为`memory_table_size_exceeded`的原因，需要把临时表`intermediate_tmp_table`以`InnoDB`引擎存在磁盘。
+
 ```sql
 mysql> show global variables like '%table_size';
 +---------------------+----------+
@@ -509,10 +514,6 @@ mysql> show global variables like 'sort_buffer_size';
 5. 用到了临时文件的，需要利用磁盘外部排序，将row id写入到结果文件中；
 6. 根据结果文件中的row ID按序读取用户需要返回的数据。由于row ID不是顺序的，导致回表时是随机IO，为了进一步优化性能（变成顺序IO），MySQL会读一批row ID，并将读到的数据按排序字段顺序插入缓存区中(内存大小read_rnd_buffer_size)。
 
-##### filesort_priority_queue_optimization
-
-优先队列排序算法
-
 
 # 实验结果分析
 
@@ -540,13 +541,26 @@ mysql> select count(distinct aid) from article_rank where `day`>'20190115';
 
 ## filesort_summary.sort_mode
 
-同样的字段，同样的行数，为什么有的是`additional_fields`排序，有的是`rowid`排序
+同样的字段，同样的行数，为什么有的是`additional_fields`排序，有的是`rowid`排序呢？
+
+我们说 additional_fields 对比 rowid 来说，减少了回表，也就减少了磁盘访问，会被优先选择。但是要注意这是对于 InnoDB 来说的。而实验3是内存表，使用的是 memory 引擎。回表过程只是根据数据行的位置，直接访问内存得到数据，不会有磁盘访问（可以简单的理解为一个内存中的数组下标去找对应的元素）。排序的列越少越好占的内存就越小，所以就选择了 rowid 排序。
+
+> 关于内存表的排序详解，可以参考 MySQL实战45讲的第17讲如何正确地显示随机消息
 
 ## filesort_priority_queue_optimization.rows_estimate
 
+根据优先队列排序算法所理解：
+
+1.取出 649091 行（未排序）的前 10 行，构成一个堆。
+2.取下一行，根据 num （来源于`sum(pv)`）的值和堆里面最小的值作比较，如果该字大于堆里面的值，则替换掉（原来堆的最小值被删掉）
+3.该节点与其父节点的值继续作比较，如果大于父节点的值则二者替换。递归执行，直到根节点
+4.重复步骤2，3直到第 649091 行比较完成
+
+> 根据这个分析，四个实验都应该是扫描 649091 行，但实际结果却是，实验3是 649091 + 10 行，其他的都是 1057 行。
+
 ## converting_tmp_table_to_ondisk
 
-是否创建临时表
+是否创建临时表。同样是写入 649091 到内存临时表，为什么其他三种方式都会出现内存不够用的情况呢？
 
 ## Innodb_rows_read
 
@@ -579,11 +593,12 @@ mysql> select count(*) from article_rank where `day`>'20190115';
 ### 实验3
 实验3中因为最左列是`aid`，无法对`day>20190115`表达式进行过滤筛选，所以需要遍历整个索引（覆盖所有行的数据）。
 但是本次过程中创建的临时表（memory 引擎）没有写入磁盘，都是在内存中操作，所以最后结果是`14146055 + 1 = 14146056`；
+
+> 需要注意，如果我们开启慢查询日志，慢查询日志里面的扫描行数和这里统计的不一样，内存临时表的扫描行数也算在内的。
+
 耗时也是最短的。
 
-> 为什么实验3使用的是 rowid 排序而不是 additional_fields 排序？
-
-我们说 additional_fields 对比 rowid 来说，减少了回表，也就减少了磁盘访问，会被优先选择。但是要注意这是对于 InnoDB 来说的。而实验3是内存表，使用的是 memory 引擎。回表过程只是根据数据行的位置，直接访问内存得到数据，不会有磁盘访问。排序的列越少越好占的内存就越小，所以就选择了 rowid 排序。
+> 为什么实验3使用的是 rowid 排序而不是 additional_fields 排序？ 
 
 > 同样是写入 649091 到内存临时表，为什么其他三种方式都会出现内存不够用的情况呢？莫非其他三种情况是先把所有的行写入到临时表，再遍历合并？
 
