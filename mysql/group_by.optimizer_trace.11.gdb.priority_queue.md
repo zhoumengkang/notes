@@ -89,11 +89,9 @@ select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) wher
 
 ## 源码分析
 
-![image.png](https://static.mengkang.net/upload/image/2019/0213/1550056319330279.png)
-
 看下里面的``Sort_param`
 
-```java
+```cpp
 /**
   There are two record formats for sorting:
     |<key a><key b>...|<rowid>|
@@ -138,7 +136,35 @@ public:
 };
 ```
 
-rec_length 是每行的长度，而每种排序的格式有所不同。根据上面注释理解：
+```cpp
+class handler :public Sql_alloc
+{
+  public:
+    uchar *ref;				/* Pointer to current row */
+  public:  
+    /** Length of ref (1-8 or the clustered key length) */
+    uint ref_length;
+}
+```
 
-- rowid 排序：排序字段（num）+rowid 19 字节 
+
+rec_length 是每行的长度，而每种排序的格式有所不同。
+根据上面注释理解：
+
+- rowid 排序：排序字段（num）+rowid 19 字节
 - additional_fields 排序：排序字段（num）+ 2字节标识都不为空 + num + pv （15+2+15+4 = 36）符合预期
+
+trace 日志是在这里记录的
+![image.png](https://static.mengkang.net/upload/image/2019/0213/1550056319330279.png)
+
+![image.png](https://static.mengkang.net/upload/image/2019/0214/1550127228940404.png)
+
+```bash
+(gdb) b sortlength
+Breakpoint 7 at 0xf20d84: file /root/newdb/mysql-server/sql/filesort.cc, line 2332.
+```
+
+![image.png](https://static.mengkang.net/upload/image/2019/0214/1550145492471143.png)
+
+
+![image.png](https://static.mengkang.net/upload/image/2019/0214/1550146086426133.png)
