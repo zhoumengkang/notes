@@ -1,4 +1,8 @@
+# GDB 调试 Mysql 实战（三）优先队列排序算法探究
+
 本篇文章关键字：优先队列排序算法、小顶堆、大顶堆
+
+## 背景
 
 接着 https://mengkang.net/1328.html 的案例，我们继续磕。
 
@@ -71,9 +75,70 @@ select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) wher
 3. 重复步骤2直到第 649091 行比较完成。
 4. 然后对最后的10行做一次回表查询其 aid,num。
 
-所以至此，rows_estimate 就是 649091 + 10 = 649101。实验3的结果与之相吻合，但是其他的都是 1057 行，是怎么算出来的呢？
+### rows_estimate
 
+根据以上分析，先读取了 649091 行，然后回表又读取了 10 行，所以总共是 649101 行。
+实验3的结果与之相吻合，但是其他的都是 1057 行，是怎么算出来的呢？
 
+### row_size
 
+> 没弄明白
 
+存储在临时表里时，都是 `aid` 和 `num` 字段，占用宽度是`4+15`是19字节。
+为什么是实验3是24字节，其他是 additional_fields 排序都是36字节。
 
+## 源码分析
+
+![image.png](https://static.mengkang.net/upload/image/2019/0213/1550056319330279.png)
+
+看下里面的``Sort_param`
+
+```java
+/**
+  There are two record formats for sorting:
+    |<key a><key b>...|<rowid>|
+    /  sort_length    / ref_l /
+
+  or with "addon fields"
+    |<key a><key b>...|<null bits>|<field a><field b>...|
+    /  sort_length    /         addon_length            /
+
+  The packed format for "addon fields"
+    |<key a><key b>...|<length>|<null bits>|<field a><field b>...|
+    /  sort_length    /         addon_length                     /
+
+  <key>       Fields are fixed-size, specially encoded with
+              Field::make_sort_key() so we can do byte-by-byte compare.
+  <length>    Contains the *actual* packed length (after packing) of
+              everything after the sort keys.
+              The size of the length field is 2 bytes,
+              which should cover most use cases: addon data <= 65535 bytes.
+              This is the same as max record size in MySQL.
+  <null bits> One bit for each nullable field, indicating whether the field
+              is null or not. May have size zero if no fields are nullable.
+  <field xx>  Are stored with field->pack(), and retrieved with field->unpack().
+              Addon fields within a record are stored consecutively, with no
+              "holes" or padding. They will have zero size for NULL values.
+
+ */
+class Sort_param {
+public:
+  uint rec_length;            // Length of sorted records.
+  uint sort_length;           // Length of sorted columns.
+  uint ref_length;            // Length of record ref.
+  uint addon_length;          // Length of added packed fields.
+  uint res_length;            // Length of records in final sorted file/buffer.
+  uint max_keys_per_buffer;   // Max keys / buffer.
+  ha_rows max_rows;           // Select limit, or HA_POS_ERROR if unlimited.
+  ha_rows examined_rows;      // Number of examined rows.
+  TABLE *sort_form;           // For quicker make_sortkey.
+  bool use_hash;              // Whether to use hash to distinguish cut JSON
+  
+  //...
+};
+```
+
+rec_length 是每行的长度，而每种排序的格式有所不同。根据上面注释理解：
+
+- rowid 排序：排序字段（num）+rowid 19 字节 
+- additional_fields 排序：排序字段（num）+ 2字节标识都不为空 + num + pv （15+2+15+4 = 36）符合预期
