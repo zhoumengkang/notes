@@ -1,5 +1,3 @@
-# GDB 调试 Mysql 实战（三）优先队列排序算法探究
-
 本篇文章关键字：优先队列排序算法、小顶堆、大顶堆
 
 ## 背景
@@ -81,8 +79,6 @@ select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) wher
 实验3的结果与之相吻合，但是其他的都是 1057 行，是怎么算出来的呢？
 
 ### row_size
-
-> 没弄明白
 
 存储在临时表里时，都是 `aid` 和 `num` 字段，占用宽度是`4+15`是19字节。
 为什么是实验3是24字节，其他是 additional_fields 排序都是36字节。
@@ -168,3 +164,5 @@ Breakpoint 7 at 0xf20d84: file /root/newdb/mysql-server/sql/filesort.cc, line 23
 
 
 ![image.png](https://static.mengkang.net/upload/image/2019/0214/1550146086426133.png)
+
+这样就推断出了 rowid 排序时，优先队列排序里面的 row_size 为什么是 24 了。
