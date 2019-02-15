@@ -85,7 +85,7 @@ select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) wher
 
 ## 源码分析
 
-看下里面的``Sort_param`
+看下里面的`Sort_param`
 
 ```cpp
 /**
@@ -132,24 +132,6 @@ public:
 };
 ```
 
-```cpp
-class handler :public Sql_alloc
-{
-  public:
-    uchar *ref;				/* Pointer to current row */
-  public:  
-    /** Length of ref (1-8 or the clustered key length) */
-    uint ref_length;
-}
-```
-
-
-rec_length 是每行的长度，而每种排序的格式有所不同。
-根据上面注释理解：
-
-- rowid 排序：排序字段（num）+rowid 19 字节
-- additional_fields 排序：排序字段（num）+ 2字节标识都不为空 + num + pv （15+2+15+4 = 36）符合预期
-
 trace 日志是在这里记录的
 ![image.png](https://static.mengkang.net/upload/image/2019/0213/1550056319330279.png)
 
@@ -163,6 +145,26 @@ Breakpoint 7 at 0xf20d84: file /root/newdb/mysql-server/sql/filesort.cc, line 23
 ![image.png](https://static.mengkang.net/upload/image/2019/0214/1550145492471143.png)
 
 
-![image.png](https://static.mengkang.net/upload/image/2019/0214/1550146086426133.png)
+![image.png](https://static.mengkang.net/upload/image/2019/0215/1550198177726839.png)
 
 这样就推断出了 rowid 排序时，优先队列排序里面的 row_size 为什么是 24 了。
+
+## 小结
+row_size 就是 rec_length 在 rowid 排序中也就是
+```
+|<key a><key b>...|<rowid>|
+/  sort_length    / ref_l /
+``` 
+sort_length 就是 num 的长度 + 1字节（标识是可以为空）。*所以源码里注释有问题，没有标识出每个排序字段可以为空的长度*
+rowid 的长度就是 `table->file->ref_length` 也就是 `handler->ref_length`，可以看到`ref_length`表示该行的指针长度。因为是64位服务器，所以长度是8字节。
+
+```cpp
+class handler :public Sql_alloc
+{
+  public:
+    uchar *ref;				/* Pointer to current row */
+  public:  
+    /** Length of ref (1-8 or the clustered key length) */
+    uint ref_length;
+}
+```
