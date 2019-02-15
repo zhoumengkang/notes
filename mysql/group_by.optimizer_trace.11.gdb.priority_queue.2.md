@@ -69,8 +69,7 @@ select `aid`,sum(`pv`) as num from article_rank force index(idx_day_aid_pv)  whe
   }
 }
 ```
-
-先看为什么 row_size 是 36。
+##  row_size 为什么是 36
 
 ```bash
 (gdb) b Sort_param::init_for_filesort
@@ -91,3 +90,59 @@ Breakpoint 4 at 0xf2145f: file /root/newdb/mysql-server/sql/filesort.cc, line 25
 ![image.png](https://static.mengkang.net/upload/image/2019/0215/1550229618668980.png)
 
 排序字段还是实验3一样是16字节，后面20字节则是两个字段相加20字节+ `(null_fields + 7) / 8` 一个可为空的字段，所以最后是36了。
+
+## rows_estimate 为什么是 1057
+
+```bash
+(gdb) b /root/newdb/mysql-server/sql/filesort.cc:320
+Breakpoint 5 at 0xf1b1d9: file /root/newdb/mysql-server/sql/filesort.cc, line 320.
+...
+Breakpoint 5, filesort (thd=0x7f0214000d80, filesort=0x7f021401f668, sort_positions=false, examined_rows=0x7f022804d050,
+    found_rows=0x7f022804d048, returned_rows=0x7f022804d040) at /root/newdb/mysql-server/sql/filesort.cc:320
+320	  num_rows= table->file->estimate_rows_upper_bound();
+(gdb) s
+ha_innobase::estimate_rows_upper_bound (this=0x7f0214022b50)
+    at /root/newdb/mysql-server/storage/innobase/handler/ha_innodb.cc:13655
+ha_innobase::estimate_rows_upper_bound (this=0x7f0214022b50)
+    at /root/newdb/mysql-server/storage/innobase/handler/ha_innodb.cc:13655
+warning: Source file is more recent than executable.
+13655		DBUG_ENTER("estimate_rows_upper_bound");
+(gdb) n
+13661		update_thd(ha_thd());
+(gdb) n
+13663		TrxInInnoDB	trx_in_innodb(m_prebuilt->trx);
+(gdb) n
+13665		m_prebuilt->trx->op_info = "calculating upper bound for table rows";
+(gdb) n
+13667		index = dict_table_get_first_index(m_prebuilt->table);
+(gdb) n
+13669		ulint	stat_n_leaf_pages = index->stat_n_leaf_pages;
+(gdb) p stat_n_leaf_pages
+$19 = 139646902217632
+(gdb) n
+13671		ut_a(stat_n_leaf_pages > 0);
+(gdb) p UNIV_PAGE_SIZE
+No symbol "UNIV_PAGE_SIZE" in current context.
+(gdb) n
+13674			((ulonglong) stat_n_leaf_pages) * UNIV_PAGE_SIZE;
+(gdb) n
+13681		estimate = 2 * local_data_file_length
+(gdb) p local_data_file_length
+$20 = 16384
+(gdb) p stat_n_leaf_pages
+$21 = 1
+(gdb) n
+13682			/ dict_index_calc_min_rec_len(index);
+(gdb) n
+13684		m_prebuilt->trx->op_info = "";
+(gdb) p estimate
+$22 = 1057
+(gdb) p dict_index_calc_min_rec_len(index)
+$23 = 31
+```
+
+![image.png](https://static.mengkang.net/upload/image/2019/0215/1550231035164905.png)
+
+也就是说`local_data_file_length`是16字节，为当前系统一个内存页大小。
+`dict_index_calc_min_rec_len`注释中写道`Calculates the minimum record length in an index.`
+`dict_index_calc_min_rec_len(index)`的值为31，太复杂了先不看了，懵逼了。
