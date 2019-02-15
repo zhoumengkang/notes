@@ -6,7 +6,8 @@
 
 回顾下实验3中的例子
 ```sql
-select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) where `day`>'20190115' group by aid order by num desc limit 10;
+SET optimizer_trace='enabled=on';
+select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) where `day`>'20181223' group by aid order by num desc limit 10;
 ```
 
 `optimizer_trace.join_execution.steps`的结果如下
