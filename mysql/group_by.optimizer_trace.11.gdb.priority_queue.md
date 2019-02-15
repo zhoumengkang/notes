@@ -150,13 +150,14 @@ Breakpoint 7 at 0xf20d84: file /root/newdb/mysql-server/sql/filesort.cc, line 23
 这样就推断出了 rowid 排序时，优先队列排序里面的 row_size 为什么是 24 了。
 
 ## 小结
-row_size 就是 rec_length 在 rowid 排序中也就是
+ 
+当是 rowid 排序时，参考上面的注释可知 row_size （也就是 param->rec_length）格式如下
 ```
 |<key a><key b>...|<rowid>|
 /  sort_length    / ref_l /
 ``` 
 sort_length 就是 num 的长度 + 1字节（标识是可以为空）。*所以源码里注释有问题，没有标识出每个排序字段可以为空的长度*
-rowid 的长度就是 `table->file->ref_length` 也就是 `handler->ref_length`，可以看到`ref_length`表示该行的指针长度。因为是64位服务器，所以长度是8字节。
+rowid 的长度就是 `table->file->ref_length` 也就是 `handler->ref_length`。
 
 ```cpp
 class handler :public Sql_alloc
@@ -168,3 +169,5 @@ class handler :public Sql_alloc
     uint ref_length;
 }
 ```
+
+可以看到`ref_length`表示该行的指针长度。因为是64位服务器，所以长度是8字节，因此最后就是24字节啦。验证完毕。
