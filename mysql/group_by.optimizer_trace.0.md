@@ -567,11 +567,11 @@ mysql> select count(distinct aid) from article_rank where `day`>'20190115';
 
 ### row_size
 
-> 没弄明白
-
 存储在临时表里时，都是 `aid` 和 `num` 字段，占用宽度是`4+15`是19字节。
 实验3是 rowid 排序，也就是说`num` 15 字节 + `row ID` 6 字节，应该是21字节，实际结果是24字节；
 其他是 additional_fields 排序，也就是`15+4+6` 25 字节，实际结果是36字节。
+
+> 这是为什么呢？篇幅有限，新开一篇来分析这个问题 https://mengkang.net/1337.html
 
 ## converting_tmp_table_to_ondisk
 
