@@ -145,4 +145,20 @@ $23 = 31
 
 也就是说`local_data_file_length`是16字节，为当前系统一个内存页大小。
 `dict_index_calc_min_rec_len`注释中写道`Calculates the minimum record length in an index.`
-`dict_index_calc_min_rec_len(index)`的值为31，太复杂了先不看了，懵逼了。
+`dict_index_calc_min_rec_len(index)`的值为31。
+
+```cpp
+ut_a(stat_n_leaf_pages > 0);
+
+local_data_file_length =
+    ((ulonglong) stat_n_leaf_pages) * UNIV_PAGE_SIZE;
+
+/* Calculate a minimum length for a clustered index record and from
+that an upper bound for the number of rows. Since we only calculate
+new statistics in row0mysql.cc when a table has grown by a threshold
+factor, we must add a safety factor 2 in front of the formula below. */
+
+estimate = 2 * local_data_file_length
+    / dict_index_calc_min_rec_len(index);
+```
+`(2*16*1024)/31  = 1057`，`dict_index_calc_min_rec_len` 太复杂了先不看了，懵逼了。
