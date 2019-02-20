@@ -86,6 +86,37 @@ select `aid`,sum(`pv`) as num from article_rank force index(idx_aid_day_pv) wher
 
 ## 源码分析
 
+### rows_estimate 分析
+
+优先队列排序输出的扫描行数实际是
+
+```cpp
+num_rows= table->file->estimate_rows_upper_bound();
+```
+
+```bash
+(gdb) b /root/newdb/mysql-server/sql/filesort.cc:320
+Breakpoint 7 at 0xf1b1d9: file /root/newdb/mysql-server/sql/filesort.cc, line 320.
+(gdb) c
+Continuing.
+
+Breakpoint 7, filesort (thd=0x7f0214014810, filesort=0x7f02140216e8, sort_positions=false, examined_rows=0x7f022804d050, found_rows=0x7f022804d048,
+    returned_rows=0x7f022804d040) at /root/newdb/mysql-server/sql/filesort.cc:320
+320	  num_rows= table->file->estimate_rows_upper_bound();
+(gdb) s
+handler::estimate_rows_upper_bound (this=0x7f021493a750) at /root/newdb/mysql-server/sql/handler.h:2730
+warning: Source file is more recent than executable.
+2730	  { return stats.records+EXTRA_RECORDS; }
+(gdb)
+```
+可以看到当是rowid排序时，实际走的是
+
+![image.png](https://static.mengkang.net/upload/image/2019/0220/1550649205966317.png)
+
+全表扫描的+10，符合我们的推断。
+
+### row_size 分析
+
 看下里面的`Sort_param`
 
 ```cpp
