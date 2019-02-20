@@ -145,7 +145,7 @@ $23 = 31
 
 也就是说`local_data_file_length`是16字节，为当前系统一个内存页大小。
 `dict_index_calc_min_rec_len`注释中写道`Calculates the minimum record length in an index.`
-`dict_index_calc_min_rec_len(index)`的值为31。
+上面gdb调试记录（文字非截图）中`dict_index_calc_min_rec_len(index)`的值为31。
 
 ```cpp
 ut_a(stat_n_leaf_pages > 0);
@@ -161,4 +161,8 @@ factor, we must add a safety factor 2 in front of the formula below. */
 estimate = 2 * local_data_file_length
     / dict_index_calc_min_rec_len(index);
 ```
-`(2*16*1024)/31  = 1057`，`dict_index_calc_min_rec_len` 太复杂了先不看了，懵逼了。
+`(2*16*1024)/31  = 1057`，那么为什么`dict_index_calc_min_rec_len`是31呢？
+
+继续查看源码发现 31 是这么计算出来的，就算知道了31，但是我也还是木有弄懂，为什么扫描行数是 `(2*页内存大小)/索引最小行记录长度`
+
+![12233.001.jpeg](https://static.mengkang.net/upload/image/2019/0220/1550634648559520.jpeg)
