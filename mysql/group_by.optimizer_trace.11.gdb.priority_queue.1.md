@@ -113,7 +113,12 @@ warning: Source file is more recent than executable.
 
 ![image.png](https://static.mengkang.net/upload/image/2019/0220/1550649205966317.png)
 
-全表扫描的+10，符合我们的推断。
+```cpp
+#define EXTRA_RECORDS	10			/* Extra records in sort */
+```
+
+全表扫描的+10，符合我们的推断。不过这里`EXTRA_RECORDS`是一个常亮，有木有，而且正好是10，所以我换了个下我查询的数量`limit 11`，结果还是`649091`。
+这就尴尬啦，为什么要加上一个常量，而不是用我们实际limit的个数呢？
 
 ### row_size 分析
 
