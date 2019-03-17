@@ -1,8 +1,10 @@
-最近通过一个日志表做排行的时候发现特别卡，最后问题得到了解决，梳理一些索引和MySQL执行过程的经验（不对的地方希望大神指点），在这里和大家交流讨论下。
+# 一次不完整 group by order by 背后的性能问题分析
 
-主要包含如下知识点
+最近通过一个日志表做排行的时候发现特别卡，最后问题得到了解决，梳理一些索引和MySQL执行过程的经验，但是最后还是有**5个谜题没解开**，希望大家帮忙解答下
 
-- 用数据说话，证明慢日志的扫描行数到底是如何统计出来的
+**主要包含如下知识点**
+
+- 用数据说话证明慢日志的扫描行数到底是如何统计出来的
 - 从 group by 执行原理找出优化方案 
 - 排序的实现细节
 - gdb 源码调试
@@ -194,6 +196,30 @@ select trace from `information_schema`.`optimizer_trace`\G;
 }
 ```
 
+通过`gdb`调试确认临时表上的字段是`aid`和`num`
+```bash
+Breakpoint 1, trace_tmp_table (trace=0x7eff94003088, table=0x7eff94937200) at /root/newdb/mysql-server/sql/sql_tmp_table.cc:2306
+warning: Source file is more recent than executable.
+2306	  trace_tmp.add("row_length",table->s->reclength).
+(gdb) p table->s->reclength
+$1 = 20
+(gdb) p table->s->fields
+$2 = 2
+(gdb) p (*(table->field+0))->field_name
+$3 = 0x7eff94010b0c "aid"
+(gdb) p (*(table->field+1))->field_name
+$4 = 0x7eff94007518 "num"
+(gdb) p (*(table->field+0))->row_pack_length()
+$5 = 4
+(gdb) p (*(table->field+1))->row_pack_length()
+$6 = 15
+(gdb) p (*(table->field+0))->type()
+$7 = MYSQL_TYPE_LONG
+(gdb) p (*(table->field+1))->type()
+$8 = MYSQL_TYPE_NEWDECIMAL
+(gdb)
+```
+
 #### 执行流程如下
 
 1. 尝试在堆上使用`memory`的内存临时表来存放`group by`的数据，发现内存不够；
@@ -341,7 +367,13 @@ select trace from `information_schema`.`optimizer_trace`\G;
 2. SQL1 与 SQL2 `group by`之后得到的行数都是`552203`，为什么会出现 SQL1 内存不够，里面还有哪些细节呢？
 3. trace 信息里的`creating_tmp_table.tmp_table_info.row_limit_estimate`都是`838860`；计算由来是临时表的内存限制大小`16MB`，而一行需要占的空间是20字节，那么最多只能容纳`floor(16777216/20) = 838860`行，而实际我们需要放入临时表的行数是`785102`。为什么呢？
 4. SQL1 使用`SQL_BIG_RESULT`优化之后，原始表需要扫描的行数会乘以2，背后逻辑是什么呢？为什么仅仅是不再尝试往内存临时表里写入这一步会相差10多倍的性能？
-5. 有没有工具能够统计 SQL 执行过程中的 I/O 次数？
+5. 通过源码看到 trace 信息里面很多扫描行数都不是实际的行数，既然是实际执行，为什么 trace 信息里不输出真实的扫描行数和容量等呢，比如`filesort_priority_queue_optimization.rows_estimate`在SQL1中的扫描行数我通过gdb看到计算规则如附录图 1
+6. 有没有工具能够统计 SQL 执行过程中的 I/O 次数？
+
+## 附录
+
+![图1](https://mengkang.net/upload/image/2019/0220/1550634648559520.jpeg)
+
 
 
 
