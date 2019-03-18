@@ -384,7 +384,7 @@ begin
   while(i<=785102)do
     set aid = round(rand()*500000);
     set pv = round(rand()*100);
-    set post_day = 20181224 + i%5;
+    set post_day = 20181225 + i%5;
     insert into article_rank (`aid`,`pv`,`day`) values(aid, pv, post_day);
     set i=i+1;
   end while;
@@ -393,9 +393,53 @@ delimiter ;
 call idata();
 ```
 
+```sql
 
-### 方案2 使用 SQL_BIG_RESULT 优化
+```
 
+### 方案2 扩充临时表空间上限大小
+
+默认的临时表空间大小是16MB
+```sql
+mysql> show global variables like '%table_size';
++---------------------+----------+
+| Variable_name       | Value    |
++---------------------+----------+
+| max_heap_table_size | 16777216 |
+| tmp_table_size      | 16777216 |
++---------------------+----------+
+```
+
+> https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_max_heap_table_size
+> https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_tmp_table_size
+
+> max_heap_table_size
+> This variable sets the maximum size to which user-created MEMORY tables are permitted to grow. The value of the variable is used to calculate MEMORY table MAX_ROWS values. Setting this variable has no effect on any existing MEMORY table, unless the table is re-created with a statement such as CREATE TABLE or altered with ALTER TABLE or TRUNCATE TABLE. A server restart also sets the maximum size of existing MEMORY tables to the global max_heap_table_size value.
+
+> tmp_table_size 
+> The maximum size of internal in-memory temporary tables. This variable does not apply to user-created MEMORY tables.
+> The actual limit is determined from whichever of the values of tmp_table_size and max_heap_table_size is smaller. If an in-memory temporary table exceeds the limit, MySQL automatically converts it to an on-disk temporary table. The internal_tmp_disk_storage_engine option defines the storage engine used for on-disk temporary tables.
+
+
+也就是说这里临时表的限制是`16M`，`max_heap_table_size`大小也受`tmp_table_size`大小的限制。
+
+所以我们这里调整为`32MB`，然后执行原始的SQL
+
+```sql
+set tmp_table_size=33554432;
+set max_heap_table_size=33554432;
+```
+```sql
+# Time: 2019-03-17T06:24:29.741147Z
+# User@Host: root[root] @ localhost []  Id:     6
+# Query_time: 5.910553  Lock_time: 0.000210 Rows_sent: 10  Rows_examined: 1337315
+SET timestamp=1552803869;
+select aid,sum(pv) as num from article_rank where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
+```
+
+### 方案3 使用 SQL_BIG_RESULT 优化
+
+告诉优化器，查询结果比较多，临时表直接走磁盘存储。
 ```sql
 # Time: 2019-03-17T06:06:44.304555Z
 # User@Host: root[root] @ localhost []  Id:     6
@@ -406,4 +450,26 @@ select SQL_BIG_RESULT aid,sum(pv) as num from article_rank where day>=20181220 a
 
 扫描行数是 `2`x`满足条件的总行数（785102）`+`group by 之后的总行数（552203）`+`limit 的值`。
 
+## 总结
+
+方案1具有特殊条件性，当总表数据量与查询范围的总数相同时，且不超出内存临时表大小限制时，性能达到最佳。当查询数据量占据总表数据量越大，优化效果越不明显；
+方案2需要调整临时表内存的大小，可行；不过当数据库超过`32MB`时，如果使用该方式，还需要继续提升临时表大小；
+方案3直接声明使用磁盘来放临时表，虽然扫描行数多了一次符合条件的总行数的扫描。但是整体响应时间比方案2就慢了`0.1`秒。因为我们这里数据量比较，我觉得这个时间差还能接受。
+
+所以最后对比，选择方案3比较合适。
+
+## 问题与困惑
+
+```sql
+# SQL1
+select aid,sum(pv) as num from article_rank where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
+# SQL2
+select aid,sum(pv) as num from article_rank force index(idx_aid_day_pv) where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
+```
+1. SQL1 执行过程中，使用的是全字段排序最后不需要回表为什么总扫描行数还要加上10才对得上？
+2. SQL1 与 SQL2 `group by`之后得到的行数都是`552203`，为什么会出现 SQL1 内存不够，里面还有哪些细节呢？
+3. trace 信息里的`creating_tmp_table.tmp_table_info.row_limit_estimate`都是`838860`；计算由来是临时表的内存限制大小`16MB`，而一行需要占的空间是20字节，那么最多只能容纳`floor(16777216/20) = 838860`行，而实际我们需要放入临时表的行数是`785102`。为什么呢？
+4. SQL1 使用`SQL_BIG_RESULT`优化之后，原始表需要扫描的行数会乘以2，背后逻辑是什么呢？为什么仅仅是不再尝试往内存临时表里写入这一步会相差10多倍的性能？
+5. 通过源码看到 trace 信息里面很多扫描行数都不是实际的行数，既然是实际执行，为什么 trace 信息里不输出真实的扫描行数和容量等呢，比如`filesort_priority_queue_optimization.rows_estimate`在SQL1中的扫描行数我通过gdb看到计算规则如附录图 1
+6. 有没有工具能够统计 SQL 执行过程中的 I/O 次数？
 
