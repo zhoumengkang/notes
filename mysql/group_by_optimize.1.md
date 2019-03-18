@@ -189,7 +189,10 @@ select trace from `information_schema`.`optimizer_trace`\G;
 
 #### 分析临时表字段
 
+> mysql gdb 调试更多细节 https://mengkang.net/1336.html
+
 通过`gdb`调试确认临时表上的字段是`aid`和`num`
+
 ```bash
 Breakpoint 1, trace_tmp_table (trace=0x7eff94003088, table=0x7eff94937200) at /root/newdb/mysql-server/sql/sql_tmp_table.cc:2306
 warning: Source file is more recent than executable.
