@@ -477,3 +477,6 @@ select aid,sum(pv) as num from article_rank force index(idx_aid_day_pv) where da
 5. 通过源码看到 trace 信息里面很多扫描行数都不是实际的行数，既然是实际执行，为什么 trace 信息里不输出真实的扫描行数和容量等呢，比如`filesort_priority_queue_optimization.rows_estimate`在SQL1中的扫描行数我通过gdb看到计算规则如附录图 1
 6. 有没有工具能够统计 SQL 执行过程中的 I/O 次数？
 
+## 附录
+
+![图1](https://mengkang.net/upload/image/2019/0220/1550634648559520.jpeg)
