@@ -242,8 +242,6 @@ $8 = MYSQL_TYPE_NEWDECIMAL
 ### 方案1 使用 idx_aid_day_pv 索引
 
 ```sql
-# Time: 2019-03-17T03:03:24.918073Z
-# User@Host: root[root] @ localhost []  Id:     6
 # Query_time: 4.406927  Lock_time: 0.000200 Rows_sent: 10  Rows_examined: 1337315
 SET timestamp=1552791804;
 select aid,sum(pv) as num from article_rank force index(idx_aid_day_pv) where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
@@ -397,8 +395,13 @@ call idata();
 ```
 
 ```sql
-
+# Query_time: 9.151270  Lock_time: 0.000508 Rows_sent: 10  Rows_examined: 2122417
+SET timestamp=1552889936;
+select aid,sum(pv) as num from article_rank force index(idx_aid_day_pv) where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
 ```
+这里扫描行数`2122417`是因为扫描索引的时候需要遍历整个索引，整个索引的行数就是全表行数，因为我刚刚又插入了`785102`行。
+
+当我数据量翻倍之后，这里查询时间明显已经翻倍。所以这个优化方式不稳定。
 
 ### 方案2 扩充临时表空间上限大小
 
@@ -433,8 +436,6 @@ set tmp_table_size=33554432;
 set max_heap_table_size=33554432;
 ```
 ```sql
-# Time: 2019-03-17T06:24:29.741147Z
-# User@Host: root[root] @ localhost []  Id:     6
 # Query_time: 5.910553  Lock_time: 0.000210 Rows_sent: 10  Rows_examined: 1337315
 SET timestamp=1552803869;
 select aid,sum(pv) as num from article_rank where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
@@ -444,8 +445,6 @@ select aid,sum(pv) as num from article_rank where day>=20181220 and day<=2018122
 
 告诉优化器，查询结果比较多，临时表直接走磁盘存储。
 ```sql
-# Time: 2019-03-17T06:06:44.304555Z
-# User@Host: root[root] @ localhost []  Id:     6
 # Query_time: 6.144315  Lock_time: 0.000183 Rows_sent: 10  Rows_examined: 2122417
 SET timestamp=1552802804;
 select SQL_BIG_RESULT aid,sum(pv) as num from article_rank where day>=20181220 and day<=20181224 group by aid order by num desc limit 10;
@@ -453,9 +452,11 @@ select SQL_BIG_RESULT aid,sum(pv) as num from article_rank where day>=20181220 a
 
 扫描行数是 `2`x`满足条件的总行数（785102）`+`group by 之后的总行数（552203）`+`limit 的值`。
 
+**顺便值得一提的是：** 当我把数据量翻倍之后，使用该方式，查询时间基本没变。因为扫描的行数还是不变的。实际测试耗时`6.197484`
+
 ## 总结
 
-方案1具有特殊条件性，当总表数据量与查询范围的总数相同时，且不超出内存临时表大小限制时，性能达到最佳。当查询数据量占据总表数据量越大，优化效果越不明显；
+方案1优化效果不稳定，当总表数据量与查询范围的总数相同时，且不超出内存临时表大小限制时，性能达到最佳。当查询数据量占据总表数据量越大，优化效果越不明显；
 方案2需要调整临时表内存的大小，可行；不过当数据库超过`32MB`时，如果使用该方式，还需要继续提升临时表大小；
 方案3直接声明使用磁盘来放临时表，虽然扫描行数多了一次符合条件的总行数的扫描。但是整体响应时间比方案2就慢了`0.1`秒。因为我们这里数据量比较，我觉得这个时间差还能接受。
 
