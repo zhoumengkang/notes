@@ -1,6 +1,8 @@
 # 一次 group by + order by 性能优化分析
 
-最近通过一个日志表做排行的时候发现特别卡，最后问题得到了解决，梳理一些索引和MySQL执行过程的经验，但是最后还是有**5个谜题没解开**，希望大家帮忙解答下
+最近通过一个日志表做排行的时候发现特别卡，最后问题得到了解决，梳理一些索引和MySQL执行过程的经验，但是最后还是有**5个谜题没解开**，希望大家帮忙解答下。
+
+> 谢谢丁奇老师的《[MySQL实战45讲](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)》
 
 **主要包含如下知识点**
 
