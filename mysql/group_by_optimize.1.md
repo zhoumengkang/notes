@@ -1,10 +1,11 @@
 # 一次 group by + order by 性能优化分析
 
-最近通过一个日志表做排行的时候发现特别卡，最后问题得到了解决，梳理一些索引和MySQL执行过程的经验，但是最后还是有**5个谜题没解开**，希望大家帮忙解答下。
+最近通过一个日志表做排行的时候发现特别卡，最后问题得到了解决，梳理一些索引和MySQL执行过程的经验。
 
-> 谢谢丁奇老师的《[MySQL实战45讲](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)》
+> 特别感谢丁奇老师的《[MySQL实战45讲](https://time.geekbang.org/column/intro/139?code=PWgK7lHzTZ5V0oHA26aaVfiJUFaAwCk32BZwieZTUDg%3D)》
+> 但是最后还是有**5个谜题没解开**，大家一起讨论交流。
 
-**主要包含如下知识点**
+**本篇主要包含如下知识点**
 
 - 用数据说话证明慢日志的扫描行数到底是如何统计出来的
 - 从 group by 执行原理找出优化方案 
