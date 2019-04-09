@@ -12,13 +12,17 @@ int main(void){
 
 	user users[] = {
 		{
-			"周梦康",
-			27
-		},
-		{
 			"mengkang.zhou",
 			18
-		}
+		},
+        {
+            "周梦康",
+            27
+        },
+        {
+            "康梦周",
+            30
+        }
 	};
 
 
@@ -35,7 +39,7 @@ int main(void){
 		printf("没有输入id");
 	} else
 	{
-		printf("用户信息查询\n学号: %d\n姓名: %s\n年龄: %d",id,users[id].username,users[id].age);
+		printf("用户信息查询\n学号: %d\n姓名: %s\n年龄: %d",id,users[id-1].username,users[id-1].age);
 	}
 	
 	return 0;

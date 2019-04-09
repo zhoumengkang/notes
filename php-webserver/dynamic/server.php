@@ -54,7 +54,7 @@ class DynamicWebServer extends WebServer
 
             $this->setEnv($queryString);
 
-            $handle = popen($this->webRoot . $uri, "r");
+            $handle = popen($this->cgiRoot . $uri, "r");
             $read = stream_get_contents($handle);
             pclose($handle);
 
