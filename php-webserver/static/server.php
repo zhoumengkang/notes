@@ -1,85 +1,90 @@
 <?php
 
-class server {
+class WebServer
+{
 
     private $ip;
     private $port;
 
-    public function __construct($ip, $port) {
+    private $webRoot;
+
+    public function __construct($ip, $port,$webRoot)
+    {
         $this->ip = $ip;
         $this->port = $port;
-        $this->await();
+        $this->webRoot = $webRoot;
     }
 
-    private function await() {
+    public function start()
+    {
+        $fd = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 
-        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-
-        if ($sock < 0) {
+        if ($fd < 0) {
             echo "Error:" . socket_strerror(socket_last_error()) . "\n";
+            exit;
         }
 
-        $ret = socket_bind($sock, $this->ip, $this->port);
-
-        if (!$ret) {
+        if (socket_bind($fd, $this->ip, $this->port) < 0) {
             echo "BIND FAILED:" . socket_strerror(socket_last_error()) . "\n";
             exit;
         }
 
-        echo "OK\n";
-
-        $ret = socket_listen($sock);
-        if ($ret < 0) {
+        if (socket_listen($fd) < 0) {
             echo "LISTEN FAILED:" . socket_strerror(socket_last_error()) . "\n";
+            exit;
         }
 
+        echo $this->ip.":".$this->port."\tserver start\n";
+
         do {
-            $new_sock = null;
+            $clientFd = null;
 
             try {
-                $new_sock = socket_accept($sock);
+                $clientFd = socket_accept($fd);
             } catch (Exception $e) {
                 echo $e->getMessage();
                 echo "ACCEPT FAILED:" . socket_strerror(socket_last_error()) . "\n";
             }
 
             try {
-                $request_string = socket_read($new_sock, 1024);
+                $request_string = socket_read($clientFd, 1024);
 
                 $response = $this->output($request_string);
 
-                socket_write($new_sock, $response);
-                socket_close($new_sock);
+                socket_write($clientFd, $response);
+                socket_close($clientFd);
 
             } catch (Exception $e) {
                 echo $e->getMessage();
                 echo "READ FAILED:" . socket_strerror(socket_last_error()) . "\n";
             }
 
-        } while (TRUE);
+        } while (true);
     }
 
     /**
      * @param $request_string
+     *
      * @return string
      */
-    private function output($request_string){
+    private function output($request_string)
+    {
 
         echo $request_string;
 
         // 静态 GET /1.html HTTP/1.1 ...
 
-        $request_array = explode(" ",$request_string);
+        $request_array = explode(" ", $request_string);
 
-        if(count($request_array) < 2){
+        if (count($request_array) < 2) {
             return $this->not_found();
         }
 
         $uri = $request_array[1];
 
-        $filename = web_config::WEB_ROOT . $uri;
+        $filename = $this->webRoot . $uri;
 
-        echo "request:".$filename."\n";
+        echo "request:" . $filename . "\n";
 
         // 静态文件的处理
 
@@ -94,18 +99,25 @@ class server {
      * 404 返回
      * @return string
      */
-    private function not_found(){
+    private function not_found()
+    {
         $content = "<h1>File Not Found </h1>";
 
-        return "HTTP/1.1 404 File Not Found\r\nContent-Type: text/html\r\nContent-Length: ".strlen($content)."\r\n\r\n".$content;
+        return "HTTP/1.1 404 File Not Found\r\nContent-Type: text/html\r\nContent-Length: " . strlen($content) . "\r\n\r\n" . $content;
     }
 
     /**
      * 加上头信息
+     *
      * @param $string
+     *
      * @return string
      */
-    private function add_header($string){
-        return "HTTP/1.1 200 OK\r\nContent-Length: ".strlen($string)."\r\nServer: mengkang\r\n\r\n".$string;
+    private function add_header($string)
+    {
+        return "HTTP/1.1 200 OK\r\nContent-Length: " . strlen($string) . "\r\nServer: mengkang\r\n\r\n" . $string;
     }
 }
+
+$server = new WebServer("127.0.0.1","9001",__DIR__);
+$server->start();
