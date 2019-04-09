@@ -3,10 +3,9 @@
 class WebServer
 {
 
-    private $ip;
-    private $port;
-
-    private $webRoot;
+    protected $ip;
+    protected $port;
+    protected $webRoot;
 
     public function __construct($ip, $port, $webRoot)
     {
@@ -47,9 +46,9 @@ class WebServer
             }
 
             try {
-                $request_string = socket_read($clientFd, 1024);
+                $requestData = socket_read($clientFd, 1024);
 
-                $response = $this->output($request_string);
+                $response = $this->requestHandler($requestData);
 
                 socket_write($clientFd, $response);
                 socket_close($clientFd);
@@ -63,27 +62,29 @@ class WebServer
     }
 
     /**
-     * @param $request_string
+     * @param $requestData
      *
      * @return string
      */
-    private function output($request_string)
+    protected function requestHandler($requestData)
     {
 
-        echo $request_string;
+        echo $requestData;
 
         // 静态 GET /1.html HTTP/1.1 ...
 
-        $request_array = explode(" ", $request_string);
-
-        if (count($request_array) < 2) {
-            return $this->notFound();
+        $array = explode(" ", $requestData);
+        if (count($array) < 2) {
+            return "";
         }
 
-        $uri = $request_array[1];
+        $uri = $array[1];
+
+        if ($uri == "/favicon.ico") {
+            return "";
+        }
 
         $filename = $this->webRoot . $uri;
-
         echo "request:" . $filename . "\n";
 
         // 静态文件的处理
@@ -100,7 +101,7 @@ class WebServer
      *
      * @return string
      */
-    private function notFound()
+    protected function notFound()
     {
         $content = "<h1>File Not Found </h1>";
 
@@ -114,11 +115,8 @@ class WebServer
      *
      * @return string
      */
-    private function addHeader($string)
+    protected function addHeader($string)
     {
         return "HTTP/1.1 200 OK\r\nContent-Length: " . strlen($string) . "\r\nServer: mengkang\r\n\r\n" . $string;
     }
 }
-
-$server = new WebServer("127.0.0.1", "9001", __DIR__);
-$server->start();
