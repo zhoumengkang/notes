@@ -8,7 +8,7 @@ class WebServer
 
     private $webRoot;
 
-    public function __construct($ip, $port,$webRoot)
+    public function __construct($ip, $port, $webRoot)
     {
         $this->ip = $ip;
         $this->port = $port;
@@ -34,7 +34,7 @@ class WebServer
             exit;
         }
 
-        echo $this->ip.":".$this->port."\tserver start\n";
+        echo $this->ip . ":" . $this->port . "\tserver start\n";
 
         do {
             $clientFd = null;
@@ -77,7 +77,7 @@ class WebServer
         $request_array = explode(" ", $request_string);
 
         if (count($request_array) < 2) {
-            return $this->not_found();
+            return $this->notFound();
         }
 
         $uri = $request_array[1];
@@ -89,17 +89,18 @@ class WebServer
         // 静态文件的处理
 
         if (file_exists($filename)) {
-            return $this->add_header(file_get_contents($filename));
+            return $this->addHeader(file_get_contents($filename));
         } else {
-            return $this->not_found();
+            return $this->notFound();
         }
     }
 
     /**
      * 404 返回
+     *
      * @return string
      */
-    private function not_found()
+    private function notFound()
     {
         $content = "<h1>File Not Found </h1>";
 
@@ -113,11 +114,11 @@ class WebServer
      *
      * @return string
      */
-    private function add_header($string)
+    private function addHeader($string)
     {
         return "HTTP/1.1 200 OK\r\nContent-Length: " . strlen($string) . "\r\nServer: mengkang\r\n\r\n" . $string;
     }
 }
 
-$server = new WebServer("127.0.0.1","9001",__DIR__);
+$server = new WebServer("127.0.0.1", "9001", __DIR__);
 $server->start();
